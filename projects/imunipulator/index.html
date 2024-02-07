@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<!--
+	Forty by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+
+<head>
+	<title>IMUnipulator | Nicolas G. Morales</title>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+	<!--[if lte IE 8]><script src="/assets/js/ie/html5shiv.js"></script><![endif]-->
+	<link rel="stylesheet" href="/assets/css/main.css" />
+	<!--[if lte IE 9]><link rel="stylesheet" href="/assets/css/ie9.css" /><![endif]-->
+	<!--[if lte IE 8]><link rel="stylesheet" href="/assets/css/ie8.css" /><![endif]-->
+</head>
+
+
+<body>
+
+    <!-- Wrapper -->
+<div id="wrapper">
+
+<!-- Header -->
+<header id="header">
+	
+		<a href="https://ngmor.github.io/" class="logo"><strong>Portfolio</strong> <span>Nicolas G. Morales</span></a>
+	
+	
+	<nav>
+		<a href="#menu">Menu</a>
+	</nav>
+</header>
+
+<!-- Menu -->
+<nav id="menu">
+	<ul class="links">
+        
+		    
+		
+		    
+		
+		    
+		
+		    
+				
+					<li><a href="https://ngmor.github.io/">Home</a></li>
+				
+	    	
+		
+		    
+		
+		    
+		
+		    
+		
+		
+		    
+		
+		    
+		        <li><a href="https://ngmor.github.io/about.html">About Me</a></li>
+		    
+		
+		    
+		        <li><a href="https://ngmor.github.io/contact.html">Contact</a></li>
+		    
+		
+		    
+		
+		    
+		        <li><a href="https://ngmor.github.io/projects.html">Projects</a></li>
+		    
+		
+		    
+		        <li><a href="https://ngmor.github.io/resume.html">Resume</a></li>
+		    
+		
+	</ul>
+	<!--
+	<ul class="actions vertical">
+		<li><a href="#" class="button special fit">Get Started</a></li>
+		<li><a href="#" class="button fit">Log In</a></li>
+	</ul>
+	-->
+</nav>
+ 
+    
+    
+<!-- Main -->
+<div id="main" class="alt">
+
+<!-- One -->
+<section id="one">
+	<div class="inner">
+		<header class="major">
+			<h1>IMUnipulator</h1>
+		</header>
+		<div><strong>Technologies:</strong> C, IMU, nRF52833</div><br>
+		
+			
+		
+		<p><a href="https://github.com/hang-yin/IMUnipulator">GitHub Repository</a></p>
+
+<p>Students in Northwestern University’s CE346 Microprocessor System Design course complete a final project, with the goal of designing a microcontroller device to achieve some creative task. For the project, we programmed a <a href="https://tech.microbit.org/hardware/2-0-revision/"><strong>micro:bit v2</strong></a> (based on the <a href="https://www.nordicsemi.com/Products/nRF52833"><strong>Nordic nRF52833 SoC</strong></a>) in <strong>C</strong>.</p>
+
+<p>Our team, <strong>IMUnipulator</strong>, decided to collaborate with another group, <a href="https://github.com/katie-hughes/emgripper"><strong>EMGripper</strong></a>, to create the <strong>IMUGripulator</strong>! This device was a 2-DoF robotic arm with joints controlled by a 9-DoF inertial measurement unit (IMU) attached to someone’s hand (IMUnipulator’s portion of the project). The end-effector of the arm was a gripper controlled by an EMG sensor and force-sensitive resistor (EMGripper’s portion of the project).</p>
+
+<p>Here’s a demo of the full device:</p>
+
+<div style="width: 75%; margin: 0 auto;">
+    <div class="video-wrapper">
+        <iframe src="https://www.youtube.com/embed/QiHyVv4Mg3w" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen=""></iframe>
+    </div>
+</div>
+
+<p><br /></p>
+
+<details><summary><strong><u>Table of Contents</u></strong></summary>
+<ul>
+  <li><a href="#design">Design</a></li>
+  <li><a href="#drivers">Drivers</a></li>
+  <li><a href="#mechanical-hardware">Mechanical Hardware</a>
+    <ul>
+      <li><a href="#base">Base</a></li>
+      <li><a href="#end-effector-options">End-Effector Options</a></li>
+    </ul>
+  </li>
+  <li><a href="#team">Team</a></li>
+</ul>
+</details>
+
+<hr />
+
+<h2 id="design">Design</h2>
+<p>The core of the IMUnipulator consists of two servos for actuating the arm and an IMU attached to the arm of the user with a bracelet. The micro:bit microcontroller gets signals from the IMU which it uses to command positions of the servos.</p>
+
+<p style="text-align: center;"><img src="/assets/images/imunipulator/design-diagram.png" alt="Design Diagram" width="60%" /></p>
+<p style="text-align: center;"><em>A basic diagram of the IMUnipulator device.</em></p>
+
+<p>The micro:bit collects roll and pitch data via I2C from the IMU’s accelerometer and converts the data into degrees of tilt in each axis. If either axis indicates a tilt that is higher than a certain threshold, the corresponding servo will be commanded to move.</p>
+
+<p>The roll axis controls the lower joint of the arm, called the “base” joint. The pitch axis controls the upper joint of the arm, called the “arm” joint. To simplify user experience, only one axis can move at a time, and the arm joint is prioritized over the base joint.</p>
+
+<p>Finally, the arm can be returned to its default “home” position via a touch of an external capacitive touch sensor.</p>
+
+<details><summary><strong><u>Expand</u></strong> for more technical details on the control logic.</summary>
+<p>The servos are controlled via PWM duty cycles, each one indicating a different position to which the servo should move. The micro:bit sends data over I2C to set the value of that duty cycle to the PCA9685, which in turn produces a PWM signal with that duty cycle. Each servo has a mechanical limit of 180 degrees of rotation, though the arm joint is limited in software to less than that so it won’t collide with the ground.</p>
+
+<p>While an IMU axis remains tilted beyond its threshold, the servo commanded position is incremented/decremented at a certain rate. This rate can be controlled by the “sensitivity” level of the arm, which is adjusted via the micro:bit’s built-in capacitive touch sensor and indicated by the built-in LED matrix.</p>
+
+</details>
+
+<hr />
+
+<h2 id="drivers">Drivers</h2>
+<p>We had to write several drivers in order to interface with the various devices used.</p>
+
+<details><summary><strong><u>I2C</u></strong></summary>
+<p>A general use driver to communicate with a device on one of the micro:bit’s I2C buses.</p>
+
+</details>
+
+<details><summary><strong><u>IMU</u></strong></summary>
+<p>A driver that uses the I2C driver to communicate with the <a href="https://learn.adafruit.com/adafruit-tdk-invensense-icm-20948-9-dof-imu">Adafruit TDK InvenSense ICM-20948 9-DoF IMU</a>’s accelerometer and convert the received acceleration data into tilt angles.</p>
+
+</details>
+
+<details><summary><strong><u>Servos</u></strong></summary>
+<p>A driver that uses the I2C driver to communicate with the <a href="https://www.adafruit.com/product/815">Adafruit PCA9685 I2C 16-Channel 12-bit PWM Driver</a>. This external board takes commanded duty cycles over I2C and translates them to PWM signals, which are then sent out to the MG996R and DS3218 servos used in the robot joints. Each duty cycle corresponds to a certain rotational position for the servo, from 0 to 180 degrees. Interestingly, although this duty cycle to servo angle relationship was supposed to be linear, using a simple linear equation to calculate duty cycle from desired angle didn’t actually work very well. Instead, we had to take several data points for different desired angles and commanded duty cycle relationships, store them in arrays, and linearly interpolate between them to get accurate servo positions.</p>
+
+</details>
+
+<div style="width: 50%; margin: 0 auto;">
+    <div class="video-wrapper">
+        <iframe src="https://www.youtube.com/embed/rIAc1I_heek" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen=""></iframe>
+    </div>
+</div>
+<p style="text-align: center;"><em>Testing out the servo driver by moving the two servos in unison through their range of motion.</em></p>
+
+<details><summary><strong><u>Capacitive Touch</u></strong></summary>
+<p>A driver that determines if the micro:bit’s built-in “capacitive touch sensor” (really just a pin connected to the micro:bit logo) has been touched. External <a href="https://www.sparkfun.com/products/14520">SparkFun AT42QT1011 Capacitive Touch Breakouts</a> were also used, but these just provided a digital signal to GPIO pins and did not require this special driver.</p>
+
+</details>
+
+<details><summary><strong><u>LED Matrix</u></strong></summary>
+<p>A driver to control the micro:bit’s built-in LED matrix, which was used to indicate the arm’s current sensitivity level.</p>
+
+</details>
+
+<hr />
+
+<h2 id="mechanical-hardware">Mechanical Hardware</h2>
+<p>Although the focus of the project was the electrical and software design, the team also did some mechanical design, primarily for 3D printed components. All of these components were printed out of PETG on a Prusa i3 MK2.</p>
+
+<h3 id="base">Base</h3>
+<p>Some of the arm components were already provided by a small robot arm kit that one of the EMGripper team had on hand. But in order to use these in the configuration we wanted, we had to design a simple base. It was constructed out of 1-inch 80-20 bars to provide solid weighted base, and a custom adapter was designed to mate the arm components with the 80-20.</p>
+
+<p style="text-align: center;"><img src="/assets/images/imunipulator/base-cad.png" alt="CAD of the base assembly" width="50%" style="padding-right: 5%; padding-bottom: 2.5%;" />
+<img src="/assets/images/imunipulator/base-complete.jpg" alt="Base assembly fully constructed" width="30%" /></p>
+
+<h3 id="end-effector-options">End-Effector Options</h3>
+<p>The IMUnipulator was designed to have several different end-effector options that can be quickly switched out.</p>
+
+<ul>
+  <li>
+    <p><strong>Marker Holder</strong> - this end effector held a whiteboard marker so you could draw any blocky pictures you want - since the arm only moves in one axis at a time.</p>
+  </li>
+  <li>
+    <p><strong>Electromagnet Hand</strong> - use The Force to pick up objects! Well, metal ones at least, since the “force” is electromagnetism.</p>
+  </li>
+</ul>
+
+<p style="text-align: center;"><img src="/assets/images/imunipulator/ee-marker-cad.png" alt="Marker holder end-effector" width="45%" style="padding-right: 5%;" />
+<img src="/assets/images/imunipulator/ee-electromagnet-cad.png" alt="Electromagnet hand end-effector" width="40%" /></p>
+
+<ul>
+  <li><strong>EMGripper</strong> - by far our favorite end-effector. This team’s project uses an EMG sensor to detect muscle contractions in the user’s arm and close a gripper using a servo. A force sensitive resistor on the gripper prongs prevents the gripper from continuing to close once it reaches a force limit.</li>
+</ul>
+
+<div style="width: 50%; margin: 0 auto;">
+    <div class="video-wrapper">
+        <iframe src="https://www.youtube.com/embed/xFMn450j_hQ" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen=""></iframe>
+    </div>
+</div>
+
+<p><br /></p>
+
+<hr />
+
+<h2 id="team">Team</h2>
+<p>The IMUnipulator team worked together on the software, electrical, and mechanical design of the arm. It consisted of:</p>
+<ul>
+  <li>Felipe Jannarone</li>
+  <li>Nick Morales</li>
+  <li>Hang-Yin</li>
+</ul>
+
+<p>The EMGripper team produced the EMGripper end effector shown in the videos. It Consisted of:</p>
+<ul>
+  <li>David Dorf</li>
+  <li>Katie Hughes</li>
+  <li>James Oubre</li>
+</ul>
+
+<p style="text-align: center;"><img src="/assets/images/imunipulator/team.jpg" alt="The full IMUGripulator team" width="50%" /></p>
+<p style="text-align: center;"><em>The full IMUGripulator team!</em></p>
+
+	</div>
+</section>
+
+</div>
+
+    <!-- Contact -->
+<!--
+<section id="contact">
+	<div class="inner">
+		<section>
+			<form action="https://formspree.io/nicolasgmorales@u.northwestern.edu" method="POST">
+				<div class="field half first">
+					<label for="name">Name</label>
+					<input type="text" name="name" id="name" />
+				</div>
+				<div class="field half">
+					<label for="email">Email</label>
+					<input type="text" name="_replyto" id="email" />
+				</div>
+				<div class="field">
+					<label for="message">Message</label>
+					<textarea name="message" id="message" rows="6"></textarea>
+				</div>
+				<ul class="actions">
+					<li><input type="submit" value="Send Message" class="special" /></li>
+					<li><input type="reset" value="Clear" /></li>
+				</ul>
+			</form>
+		</section>
+		<section class="split">
+			<section>
+				<div class="contact-method">
+					<span class="icon alt fa-envelope"></span>
+					<h3>Email</h3>
+					<a href="mailto:nicolasgmorales@u.northwestern.edu">nicolasgmorales@u.northwestern.edu</a>
+				</div>
+			</section>
+			<section>
+				<div class="contact-method">
+					<span class="icon alt fa-phone"></span>
+					<h3>Phone</h3>
+					<a href="tel:(937) 776-0843">(937) 776-0843</a>
+				</div>
+			</section>
+			<section>
+				<div class="contact-method">
+					<span class="icon alt fa-home"></span>
+					<h3>Address</h3>
+					<span>
+					
+					
+					    Chicago,
+					
+					
+					    IL 
+					
+					
+					
+					    United States of America
+					
+					</span>
+				</div>
+			</section>
+		</section>
+	</div>
+</section>
+-->
+<!-- Footer -->
+	<footer id="footer">
+		<div class="inner">
+			<ul class="icons">
+    <li><a href="mailto:nicolasgmorales@u.northwestern.edu" class="icon alt fa-envelope"></a></li>
+    <li><a href="tel:(937) 776-0843" class="icon alt fa-phone"></a></li>
+    
+        
+            <li>
+                <a href="https://www.linkedin.com/in/nicolasgmorales/" class="icon alt fa-linkedin" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
+                    <span class="label">LinkedIn</span>
+                </a>
+            </li>
+        
+    
+        
+            <li>
+                <a href="https://github.com/ngmor" class="icon alt fa-github" target="_blank" rel="noopener noreferrer" aria-label="GitHub">
+                    <span class="label">GitHub</span>
+                </a>
+            </li>
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+</ul>
+			<!--
+			<ul class="icons">
+				<li><a href="mailto:nicolasgmorales@u.northwestern.edu" class="icon alt fa-envelope"></a></li>
+				<li><a href="tel:(937) 776-0843" class="icon alt fa-phone"></a></li>
+				
+					
+						<li>
+							<a href="https://www.linkedin.com/in/nicolasgmorales/" class="icon alt fa-linkedin" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
+								<span class="label">LinkedIn</span>
+							</a>
+						</li>
+					
+				
+					
+						<li>
+							<a href="https://github.com/ngmor" class="icon alt fa-github" target="_blank" rel="noopener noreferrer" aria-label="GitHub">
+								<span class="label">GitHub</span>
+							</a>
+						</li>
+					
+				
+					
+				
+					
+				
+					
+				
+					
+				
+					
+				
+					
+				
+			</ul>
+			-->
+			<ul class="copyright">
+				<li>&copy; <script>document.write(new Date().getFullYear())</script> Nicolas G. Morales </li>
+				<li>Design: <a href="https://html5up.net" target="_blank">HTML5 UP</a></li>
+				<li>Jekyll integration: <a href="http://andrewbanchi.ch" target="_blank">Andrew Banchich</a></li>
+
+			</ul>
+		</div>
+	</footer>
+
+</div>
+
+<!-- Scripts -->
+	<script src="https://ngmor.github.io/assets/js/jquery.min.js"></script>
+	<script src="https://ngmor.github.io/assets/js/jquery.scrolly.min.js"></script>
+	<script src="https://ngmor.github.io/assets/js/jquery.scrollex.min.js"></script>
+	<script src="https://ngmor.github.io/assets/js/skel.min.js"></script>
+	<script src="https://ngmor.github.io/assets/js/util.js"></script>
+	<!--[if lte IE 8]><script src="https://ngmor.github.io/assets/js/ie/respond.min.js"></script><![endif]-->
+	<script src="https://ngmor.github.io/assets/js/main.js"></script>
+	<!-- <script src="/js/zepto.min.js"></script>
+	<script>jQuery = Zepto;</script> -->
+	<script src="https://ngmor.github.io/assets/js/jquery.details.min.js"></script>
+	<script>$('details').details();</script>
+
+</body>
+
+</html>

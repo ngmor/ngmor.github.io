@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<!--
+	Forty by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+
+<head>
+	<title>Omnid Mocobots | Nicolas G. Morales</title>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+	<!--[if lte IE 8]><script src="/assets/js/ie/html5shiv.js"></script><![endif]-->
+	<link rel="stylesheet" href="/assets/css/main.css" />
+	<!--[if lte IE 9]><link rel="stylesheet" href="/assets/css/ie9.css" /><![endif]-->
+	<!--[if lte IE 8]><link rel="stylesheet" href="/assets/css/ie8.css" /><![endif]-->
+</head>
+
+
+<body>
+
+    <!-- Wrapper -->
+<div id="wrapper">
+
+<!-- Header -->
+<header id="header">
+	
+		<a href="https://ngmor.github.io/" class="logo"><strong>Portfolio</strong> <span>Nicolas G. Morales</span></a>
+	
+	
+	<nav>
+		<a href="#menu">Menu</a>
+	</nav>
+</header>
+
+<!-- Menu -->
+<nav id="menu">
+	<ul class="links">
+        
+		    
+		
+		    
+		
+		    
+		
+		    
+				
+					<li><a href="https://ngmor.github.io/">Home</a></li>
+				
+	    	
+		
+		    
+		
+		    
+		
+		    
+		
+		
+		    
+		
+		    
+		        <li><a href="https://ngmor.github.io/about.html">About Me</a></li>
+		    
+		
+		    
+		        <li><a href="https://ngmor.github.io/contact.html">Contact</a></li>
+		    
+		
+		    
+		
+		    
+		        <li><a href="https://ngmor.github.io/projects.html">Projects</a></li>
+		    
+		
+		    
+		        <li><a href="https://ngmor.github.io/resume.html">Resume</a></li>
+		    
+		
+	</ul>
+	<!--
+	<ul class="actions vertical">
+		<li><a href="#" class="button special fit">Get Started</a></li>
+		<li><a href="#" class="button fit">Log In</a></li>
+	</ul>
+	-->
+</nav>
+ 
+    
+    
+<!-- Main -->
+<div id="main" class="alt">
+
+<!-- One -->
+<section id="one">
+	<div class="inner">
+		<header class="major">
+			<h1>Omnid Mocobots</h1>
+		</header>
+		<div><strong>Technologies:</strong> C++, Python, ROS 2</div><br>
+		
+			
+		
+		<p>For my final project in Northwestern University’s MSR program, I worked with the unique <a href="https://www.mccormick.northwestern.edu/news/articles/2022/08/mobile-cobots-offer-glimpse-of-future-of-human-robot-interaction/"><strong>omnidirectional mobile cobots</strong></a>, dubbed “omnid mocobots” or “omnids” for short. These collaborative robots were developed at Northwestern University by <a href="https://arxiv.org/abs/2206.14293"><strong>Elwin et al.</strong></a>.</p>
+
+<p>The main focus of this project was to research <a href="/projects/diffusion-policy-assistive-action-prediction">novel ways to apply assistive action prediction</a> to these robots with generative machine learning models, but I also did plenty of work <strong>improving their onboard systems</strong>. This post goes into more detail about those efforts.</p>
+
+<div style="width: 75%; margin: 0 auto;">
+    <div class="video-wrapper">
+        <iframe src="https://www.youtube.com/embed/b-YfUltluHQ" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen=""></iframe>
+    </div>
+</div>
+
+<hr />
+
+<h2 id="ros-2-conversion">ROS 2 Conversion</h2>
+
+<p>The first part of this project was to convert the omnids from running ROS 1 Noetic to running ROS 2 Iron, so their development could continue as ROS 1 is phased out. I worked on this process with my peer <a href="https://hang-yin.github.io/portfolio/">Hang-Yin</a> and our advisor, <a href="https://robotics.northwestern.edu/people/profiles/faculty/elwin-matt.html">Matthew Elwin</a>.</p>
+
+<p>This process involved installing Ubuntu 22.04 on the omnids’ Intel NUCs and upgrading a series of ROS packages to Iron. Since - at the time of this work - ROS 2 has yet to achieve full feature parity with ROS 1, I had to implement several features that were already available in ROS 1.</p>
+
+<h3 id="catch_ros2">catch_ros2</h3>
+<p>The omnid software stack previously made heavy use of the ROS 1 <a href="https://github.com/AIS-Bonn/catch_ros"><code class="language-plaintext highlighter-rouge">catch_ros</code></a> package for unit and integration testing. This package was never upgraded to ROS 2, so there was not a simple path to update these tests directly.</p>
+
+<p>Motivated by this and a desire to introduce a <strong>simple, native C++ unit/integration testing framework for ROS 2</strong>, I wrote and released an open source ROS package. <code class="language-plaintext highlighter-rouge">catch_ros2</code> is now available as Debian packages in several ROS distros - read more <a href="/projects/catch_ros2">here</a>.</p>
+
+<h3 id="launch_remote_ssh">launch_remote_ssh</h3>
+<p>ROS 1 provided the capability to launch nodes from a launch file on one machine remotely on another machine. This capability has been widely discussed, but never implemented in ROS 2. As of the time of writing this post, the design document (not the implementation) for this feature remains an <a href="https://github.com/ros2/design/pull/297">open PR</a> on the ROS 2 design repository, with the last discussion in February of 2021.</p>
+
+<p>The omnid system relied heavily on ROS 1’s remote launch capabilities to coordinate the launching of robot-specific nodes on each of the three omnids from a separate machine (the “station”). In order to mimic this performance in ROS 2, I found a <a href="https://answers.ros.org/question/364152/remotely-launch-nodes-in-ros2/">workaround</a> that creates a screen session, SSH’s into the remote system, and launches the nodes. As long as SSH keys are set up between the machines, this works reliably and allows users to read output from nodes on the remote machine.</p>
+
+<p>I formalized this workaround into the <a href="https://github.com/NU-MSR/launch_remote"><code class="language-plaintext highlighter-rouge">launch_remote_ssh</code></a>, which focuses on the ability to remotely launch launch files. There is also limited support for remotely running nodes and processes. The package extends the <a href="https://github.com/ros2/launch">ROS 2 launch system</a>, providing support for launching remotely in both Python and frontend (XML/YAML) launch files.</p>
+
+<p>Another unique capability is the concept of “flexible” launch files. Flexible launch files can be launched locally (default) like a normal ROS 2 launch file. They can also be launched remotely from the local machine on another machine by simply specifying the <code class="language-plaintext highlighter-rouge">flexible_launch.user</code> and <code class="language-plaintext highlighter-rouge">flexible_launch.machine</code> arguments. This is a convenient way to be able to run the same launch file either locally or remotely by just changing a few parameters. Flexible launch files can be generated using a CMake function which converts launch files marked as “core” launch files into flexible launch files. Currently only XML launch files are supported for this.</p>
+
+<p>As of the time of writing this post, the <code class="language-plaintext highlighter-rouge">launch_remote_ssh</code> package is a work in progress. I plan to eventually release it as a ROS Debian package. If you’d like to try it out or contribute, please do so!</p>
+
+	</div>
+</section>
+
+</div>
+
+    <!-- Contact -->
+<!--
+<section id="contact">
+	<div class="inner">
+		<section>
+			<form action="https://formspree.io/nicolasgmorales@u.northwestern.edu" method="POST">
+				<div class="field half first">
+					<label for="name">Name</label>
+					<input type="text" name="name" id="name" />
+				</div>
+				<div class="field half">
+					<label for="email">Email</label>
+					<input type="text" name="_replyto" id="email" />
+				</div>
+				<div class="field">
+					<label for="message">Message</label>
+					<textarea name="message" id="message" rows="6"></textarea>
+				</div>
+				<ul class="actions">
+					<li><input type="submit" value="Send Message" class="special" /></li>
+					<li><input type="reset" value="Clear" /></li>
+				</ul>
+			</form>
+		</section>
+		<section class="split">
+			<section>
+				<div class="contact-method">
+					<span class="icon alt fa-envelope"></span>
+					<h3>Email</h3>
+					<a href="mailto:nicolasgmorales@u.northwestern.edu">nicolasgmorales@u.northwestern.edu</a>
+				</div>
+			</section>
+			<section>
+				<div class="contact-method">
+					<span class="icon alt fa-phone"></span>
+					<h3>Phone</h3>
+					<a href="tel:(937) 776-0843">(937) 776-0843</a>
+				</div>
+			</section>
+			<section>
+				<div class="contact-method">
+					<span class="icon alt fa-home"></span>
+					<h3>Address</h3>
+					<span>
+					
+					
+					    Chicago,
+					
+					
+					    IL 
+					
+					
+					
+					    United States of America
+					
+					</span>
+				</div>
+			</section>
+		</section>
+	</div>
+</section>
+-->
+<!-- Footer -->
+	<footer id="footer">
+		<div class="inner">
+			<ul class="icons">
+    <li><a href="mailto:nicolasgmorales@u.northwestern.edu" class="icon alt fa-envelope"></a></li>
+    <li><a href="tel:(937) 776-0843" class="icon alt fa-phone"></a></li>
+    
+        
+            <li>
+                <a href="https://www.linkedin.com/in/nicolasgmorales/" class="icon alt fa-linkedin" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
+                    <span class="label">LinkedIn</span>
+                </a>
+            </li>
+        
+    
+        
+            <li>
+                <a href="https://github.com/ngmor" class="icon alt fa-github" target="_blank" rel="noopener noreferrer" aria-label="GitHub">
+                    <span class="label">GitHub</span>
+                </a>
+            </li>
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+</ul>
+			<!--
+			<ul class="icons">
+				<li><a href="mailto:nicolasgmorales@u.northwestern.edu" class="icon alt fa-envelope"></a></li>
+				<li><a href="tel:(937) 776-0843" class="icon alt fa-phone"></a></li>
+				
+					
+						<li>
+							<a href="https://www.linkedin.com/in/nicolasgmorales/" class="icon alt fa-linkedin" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
+								<span class="label">LinkedIn</span>
+							</a>
+						</li>
+					
+				
+					
+						<li>
+							<a href="https://github.com/ngmor" class="icon alt fa-github" target="_blank" rel="noopener noreferrer" aria-label="GitHub">
+								<span class="label">GitHub</span>
+							</a>
+						</li>
+					
+				
+					
+				
+					
+				
+					
+				
+					
+				
+					
+				
+					
+				
+			</ul>
+			-->
+			<ul class="copyright">
+				<li>&copy; <script>document.write(new Date().getFullYear())</script> Nicolas G. Morales </li>
+				<li>Design: <a href="https://html5up.net" target="_blank">HTML5 UP</a></li>
+				<li>Jekyll integration: <a href="http://andrewbanchi.ch" target="_blank">Andrew Banchich</a></li>
+
+			</ul>
+		</div>
+	</footer>
+
+</div>
+
+<!-- Scripts -->
+	<script src="https://ngmor.github.io/assets/js/jquery.min.js"></script>
+	<script src="https://ngmor.github.io/assets/js/jquery.scrolly.min.js"></script>
+	<script src="https://ngmor.github.io/assets/js/jquery.scrollex.min.js"></script>
+	<script src="https://ngmor.github.io/assets/js/skel.min.js"></script>
+	<script src="https://ngmor.github.io/assets/js/util.js"></script>
+	<!--[if lte IE 8]><script src="https://ngmor.github.io/assets/js/ie/respond.min.js"></script><![endif]-->
+	<script src="https://ngmor.github.io/assets/js/main.js"></script>
+	<!-- <script src="/js/zepto.min.js"></script>
+	<script>jQuery = Zepto;</script> -->
+	<script src="https://ngmor.github.io/assets/js/jquery.details.min.js"></script>
+	<script>$('details').details();</script>
+
+</body>
+
+</html>

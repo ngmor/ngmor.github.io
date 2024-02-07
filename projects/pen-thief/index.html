@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<!--
+	Forty by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+
+<head>
+	<title>OpenCV-Powered Pen Thief | Nicolas G. Morales</title>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+	<!--[if lte IE 8]><script src="/assets/js/ie/html5shiv.js"></script><![endif]-->
+	<link rel="stylesheet" href="/assets/css/main.css" />
+	<!--[if lte IE 9]><link rel="stylesheet" href="/assets/css/ie9.css" /><![endif]-->
+	<!--[if lte IE 8]><link rel="stylesheet" href="/assets/css/ie8.css" /><![endif]-->
+</head>
+
+
+<body>
+
+    <!-- Wrapper -->
+<div id="wrapper">
+
+<!-- Header -->
+<header id="header">
+	
+		<a href="https://ngmor.github.io/" class="logo"><strong>Portfolio</strong> <span>Nicolas G. Morales</span></a>
+	
+	
+	<nav>
+		<a href="#menu">Menu</a>
+	</nav>
+</header>
+
+<!-- Menu -->
+<nav id="menu">
+	<ul class="links">
+        
+		    
+		
+		    
+		
+		    
+		
+		    
+				
+					<li><a href="https://ngmor.github.io/">Home</a></li>
+				
+	    	
+		
+		    
+		
+		    
+		
+		    
+		
+		
+		    
+		
+		    
+		        <li><a href="https://ngmor.github.io/about.html">About Me</a></li>
+		    
+		
+		    
+		        <li><a href="https://ngmor.github.io/contact.html">Contact</a></li>
+		    
+		
+		    
+		
+		    
+		        <li><a href="https://ngmor.github.io/projects.html">Projects</a></li>
+		    
+		
+		    
+		        <li><a href="https://ngmor.github.io/resume.html">Resume</a></li>
+		    
+		
+	</ul>
+	<!--
+	<ul class="actions vertical">
+		<li><a href="#" class="button special fit">Get Started</a></li>
+		<li><a href="#" class="button fit">Log In</a></li>
+	</ul>
+	-->
+</nav>
+ 
+    
+    
+<!-- Main -->
+<div id="main" class="alt">
+
+<!-- One -->
+<section id="one">
+	<div class="inner">
+		<header class="major">
+			<h1>OpenCV-Powered Pen Thief</h1>
+		</header>
+		<div><strong>Technologies:</strong> Python, OpenCV, PincherX 100</div><br>
+		
+			
+		
+		<p><a href="https://github.com/ngmor/pen-challenge">GitHub Repository</a></p>
+
+<p>As a start to the MS in Robotics program at Northwestern University, my fellow cohort members and I participated in an orientation/hackathon in which we learned about several essential topics in the world of robotics. The hackathon culminated with a challenge to use <strong>computer vision</strong> and a <strong>robotic arm</strong> to reach out and snatch a Northwestern-purple pen from an unsuspecting human’s (or robot’s) grasp.</p>
+
+<p>To complete this challenge, I used an <a href="https://www.intelrealsense.com/depth-camera-d435i/"><strong>Intel RealSense D435i</strong></a> along with the <strong>PyRealSense</strong> and <strong>OpenCV</strong> libraries to detect the pen in the robot’s workspace via its color. Then I used a <a href="https://www.trossenrobotics.com/docs/interbotix_xsarms/specifications/px100.html"><strong>Trossen PincherX-100 Robot Arm</strong></a> with its Python API and the <a href="https://github.com/NxRLab/ModernRobotics"><strong>Modern Robotics</strong></a> library to grab the pen.</p>
+
+<div style="width: 75%; margin: 0 auto;">
+    <div class="video-wrapper">
+        <iframe src="https://www.youtube.com/embed/pJKTEZ_dBF0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen=""></iframe>
+    </div>
+</div>
+
+<p><br /></p>
+
+<p>After successfully completing the challenge, a few of my fellow cohort members and I programmed our robots to hand the pen off to eachother in a relay as shown in the video!</p>
+
+<h3 id="how-it-worked">How It Worked</h3>
+
+<p>The D435i provides both color and depth information. To find the pen’s location, I could determine the pixels representing the pen in the image by thresholding the color image based on a range of HSV values which represented the pen’s color. Then I could find a contour around these pixels and find the 2D coordinates of the centroid of that contour in the image. Finally, the depth data from the D435i gave the last coordinate needed to describe the pen’s 3D coordinates in the camera’s reference frame.</p>
+
+<p style="text-align: center;"><img src="/assets/images/pen-thief/pen-tracking.gif" alt="Possible total height reduction" width="50%" /></p>
+
+<p>To determine the location of the pen in the robot’s reference frame, I added a calibration routine. In this routine, I held the pen up to the robot’s gripper. I then used forward kinematics to determine the position of the robot’s gripper in the robot’s frame. I simplified the calibration by assuming that the camera was oriented horizontally and at a 90° angle to the robot arm. With that assumption, a comparison of the camera’s pen coordinates and the robot’s gripper position allowed me to determine a transformation between the camera and the robot reference frames.</p>
+
+<p>Knowing this information, I could then determine the location of the pen in the robot’s reference frame regardless of where I placed it. From there, a simple algorithm adjusted the PincherX 100’s waist angle and executed a trajectory to move the gripper to the pen. Once it was within a tolerance, the gripper closed on the pen.</p>
+
+<h3 id="possible-improvements">Possible Improvements</h3>
+<p>I always like to think of how I could improve my projects if given a next iteration! Here are some of my ideas:</p>
+
+<details><summary><strong>1. Improve the calibration method.</strong></summary>
+<p>The calibration method to determine the transformation between the camera reference frame and the robot reference frame relies on an assumption about the orientation of the camera relative to the robot. An improvement on this might be to use some sort of <strong><a href="https://en.wikipedia.org/wiki/Fiducial_marker">fiducial marker</a></strong>, like an AprilTag affixed to the robot’s base. By choosing a known geometry between the robot’s reference frame and the location of the marker, I could detect the marker in my CV application and calculate a much more accurate transformation.</p>
+
+</details>
+
+<details><summary><strong>2. Add communication during the relay race.</strong></summary>
+<p>Due to time limitations of the hackathon, our pen thief relay race relied on timing for the robots to know when to act in relation to one another. This is of course very unreliable. A much better solution would be to have the robots actually communicate to one another to decide when each robot would grasp, release, and move the pen. We could accomplish this by taking advantage of the <a href="https://docs.python.org/3/library/socket.html"><strong>socket</strong></a> library in Python to send simple <strong>TCP packets</strong> between the robots for sequence handshakes.</p>
+
+</details>
+
+	</div>
+</section>
+
+</div>
+
+    <!-- Contact -->
+<!--
+<section id="contact">
+	<div class="inner">
+		<section>
+			<form action="https://formspree.io/nicolasgmorales@u.northwestern.edu" method="POST">
+				<div class="field half first">
+					<label for="name">Name</label>
+					<input type="text" name="name" id="name" />
+				</div>
+				<div class="field half">
+					<label for="email">Email</label>
+					<input type="text" name="_replyto" id="email" />
+				</div>
+				<div class="field">
+					<label for="message">Message</label>
+					<textarea name="message" id="message" rows="6"></textarea>
+				</div>
+				<ul class="actions">
+					<li><input type="submit" value="Send Message" class="special" /></li>
+					<li><input type="reset" value="Clear" /></li>
+				</ul>
+			</form>
+		</section>
+		<section class="split">
+			<section>
+				<div class="contact-method">
+					<span class="icon alt fa-envelope"></span>
+					<h3>Email</h3>
+					<a href="mailto:nicolasgmorales@u.northwestern.edu">nicolasgmorales@u.northwestern.edu</a>
+				</div>
+			</section>
+			<section>
+				<div class="contact-method">
+					<span class="icon alt fa-phone"></span>
+					<h3>Phone</h3>
+					<a href="tel:(937) 776-0843">(937) 776-0843</a>
+				</div>
+			</section>
+			<section>
+				<div class="contact-method">
+					<span class="icon alt fa-home"></span>
+					<h3>Address</h3>
+					<span>
+					
+					
+					    Chicago,
+					
+					
+					    IL 
+					
+					
+					
+					    United States of America
+					
+					</span>
+				</div>
+			</section>
+		</section>
+	</div>
+</section>
+-->
+<!-- Footer -->
+	<footer id="footer">
+		<div class="inner">
+			<ul class="icons">
+    <li><a href="mailto:nicolasgmorales@u.northwestern.edu" class="icon alt fa-envelope"></a></li>
+    <li><a href="tel:(937) 776-0843" class="icon alt fa-phone"></a></li>
+    
+        
+            <li>
+                <a href="https://www.linkedin.com/in/nicolasgmorales/" class="icon alt fa-linkedin" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
+                    <span class="label">LinkedIn</span>
+                </a>
+            </li>
+        
+    
+        
+            <li>
+                <a href="https://github.com/ngmor" class="icon alt fa-github" target="_blank" rel="noopener noreferrer" aria-label="GitHub">
+                    <span class="label">GitHub</span>
+                </a>
+            </li>
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+</ul>
+			<!--
+			<ul class="icons">
+				<li><a href="mailto:nicolasgmorales@u.northwestern.edu" class="icon alt fa-envelope"></a></li>
+				<li><a href="tel:(937) 776-0843" class="icon alt fa-phone"></a></li>
+				
+					
+						<li>
+							<a href="https://www.linkedin.com/in/nicolasgmorales/" class="icon alt fa-linkedin" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
+								<span class="label">LinkedIn</span>
+							</a>
+						</li>
+					
+				
+					
+						<li>
+							<a href="https://github.com/ngmor" class="icon alt fa-github" target="_blank" rel="noopener noreferrer" aria-label="GitHub">
+								<span class="label">GitHub</span>
+							</a>
+						</li>
+					
+				
+					
+				
+					
+				
+					
+				
+					
+				
+					
+				
+					
+				
+			</ul>
+			-->
+			<ul class="copyright">
+				<li>&copy; <script>document.write(new Date().getFullYear())</script> Nicolas G. Morales </li>
+				<li>Design: <a href="https://html5up.net" target="_blank">HTML5 UP</a></li>
+				<li>Jekyll integration: <a href="http://andrewbanchi.ch" target="_blank">Andrew Banchich</a></li>
+
+			</ul>
+		</div>
+	</footer>
+
+</div>
+
+<!-- Scripts -->
+	<script src="https://ngmor.github.io/assets/js/jquery.min.js"></script>
+	<script src="https://ngmor.github.io/assets/js/jquery.scrolly.min.js"></script>
+	<script src="https://ngmor.github.io/assets/js/jquery.scrollex.min.js"></script>
+	<script src="https://ngmor.github.io/assets/js/skel.min.js"></script>
+	<script src="https://ngmor.github.io/assets/js/util.js"></script>
+	<!--[if lte IE 8]><script src="https://ngmor.github.io/assets/js/ie/respond.min.js"></script><![endif]-->
+	<script src="https://ngmor.github.io/assets/js/main.js"></script>
+	<!-- <script src="/js/zepto.min.js"></script>
+	<script>jQuery = Zepto;</script> -->
+	<script src="https://ngmor.github.io/assets/js/jquery.details.min.js"></script>
+	<script>$('details').details();</script>
+
+</body>
+
+</html>

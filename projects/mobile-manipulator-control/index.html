@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<!--
+	Forty by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+
+<head>
+	<title>Mobile Manipulator Control | Nicolas G. Morales</title>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+	<!--[if lte IE 8]><script src="/assets/js/ie/html5shiv.js"></script><![endif]-->
+	<link rel="stylesheet" href="/assets/css/main.css" />
+	<!--[if lte IE 9]><link rel="stylesheet" href="/assets/css/ie9.css" /><![endif]-->
+	<!--[if lte IE 8]><link rel="stylesheet" href="/assets/css/ie8.css" /><![endif]-->
+</head>
+
+
+<body>
+
+    <!-- Wrapper -->
+<div id="wrapper">
+
+<!-- Header -->
+<header id="header">
+	
+		<a href="https://ngmor.github.io/" class="logo"><strong>Portfolio</strong> <span>Nicolas G. Morales</span></a>
+	
+	
+	<nav>
+		<a href="#menu">Menu</a>
+	</nav>
+</header>
+
+<!-- Menu -->
+<nav id="menu">
+	<ul class="links">
+        
+		    
+		
+		    
+		
+		    
+		
+		    
+				
+					<li><a href="https://ngmor.github.io/">Home</a></li>
+				
+	    	
+		
+		    
+		
+		    
+		
+		    
+		
+		
+		    
+		
+		    
+		        <li><a href="https://ngmor.github.io/about.html">About Me</a></li>
+		    
+		
+		    
+		        <li><a href="https://ngmor.github.io/contact.html">Contact</a></li>
+		    
+		
+		    
+		
+		    
+		        <li><a href="https://ngmor.github.io/projects.html">Projects</a></li>
+		    
+		
+		    
+		        <li><a href="https://ngmor.github.io/resume.html">Resume</a></li>
+		    
+		
+	</ul>
+	<!--
+	<ul class="actions vertical">
+		<li><a href="#" class="button special fit">Get Started</a></li>
+		<li><a href="#" class="button fit">Log In</a></li>
+	</ul>
+	-->
+</nav>
+ 
+    
+    
+<!-- Main -->
+<div id="main" class="alt">
+
+<!-- One -->
+<section id="one">
+	<div class="inner">
+		<header class="major">
+			<h1>Mobile Manipulator Control</h1>
+		</header>
+		<div><strong>Technologies:</strong> Python, CoppeliaSim, Screw Theory</div><br>
+		
+			
+		
+		<p><a href="https://github.com/ngmor/robotic-manipulation-final">GitHub Repository</a></p>
+
+<p>While taking Northwestern University’s ME449 Robotic Manipulation class, students complete a capstone project that combines several elements in the course together into a simulation controlling a mobile manipulator Kuka youBot.</p>
+
+<p>The goal of this project is to use <strong>modern screw theory</strong> concepts along with the <a href="https://github.com/NxRLab/ModernRobotics"><strong>Modern Robotics</strong></a> library in <strong>Python</strong> to generate a trajectory for the youBot’s end-effector to pick up a block and place it in a target location. <strong>Feedforward + PI control</strong> is used to eliminate error between the actual robot trajectory and the generated reference trajectory. The simulation is performed in CoppeliaSim, with ODE as an engine to simulate the physics of picking up the block in the youBot’s gripper.</p>
+
+<p>Here’s a video of my solution to the problem:</p>
+
+<div style="width: 75%; margin: 0 auto;">
+    <div class="video-wrapper">
+        <iframe src="https://www.youtube.com/embed/Q9zL-nBLH3Q" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen=""></iframe>
+    </div>
+</div>
+
+<p><br /></p>
+
+<details><summary><strong><u>Table of Contents</u></strong></summary>
+<ul>
+  <li><a href="#design">Design</a>
+    <ul>
+      <li><a href="#milestone-1-youbot-kinematics-simulator">Milestone 1: youBot Kinematics Simulator</a></li>
+      <li><a href="#milestone-2-reference-trajectory-generation">Milestone 2: Reference Trajectory Generation</a></li>
+      <li><a href="#milestone-3-feedforwardfeedback-control">Milestone 3: Feedforward/Feedback Control</a></li>
+      <li><a href="#self-collision-avoidance">Self-Collision Avoidance</a></li>
+    </ul>
+  </li>
+  <li><a href="#future-work">Future Work</a></li>
+</ul>
+</details>
+
+<hr />
+
+<h2 id="design">Design</h2>
+<p>The project is split up into several steps, called “milestones.”</p>
+
+<h3 id="milestone-1-youbot-kinematics-simulator">Milestone 1: youBot Kinematics Simulator</h3>
+<p>The first step was to write code to simulate the youBot kinematics. The CoppeliaSim scene only performs physics simulations for the youBot gripper and the block, to determine whether the motion of the youBot succeeds to pick up the block. The actual motion of the youBot is input into the CoppeliaSim scene as a CSV which includes joint states, wheel positions, and chassis positions.</p>
+
+<p>In order to create an accurate simulation (at least kinematically), I used first-order Euler integration to determine the new states of the joints and wheels based on the current state and input command velocities. The position of the chassis of the omnidirectional robot is dependent on the wheel motion, so I used odometry to then determine the change in chassis position from the wheel motion.</p>
+
+<h3 id="milestone-2-reference-trajectory-generation">Milestone 2: Reference Trajectory Generation</h3>
+<p>Next, a reference trajectory for the youBot end-effector is generated. This reference trajectory consists of 8 segments:</p>
+
+<ol>
+  <li>Initial end-effector position to a standoff position above the block</li>
+  <li>Pick standoff position down to pick position</li>
+  <li>Closing the gripper</li>
+  <li>Pick position up to pick standoff position</li>
+  <li>Pick standoff position to place standoff position above the block place location</li>
+  <li>Place standoff position down to place position</li>
+  <li>Opening the gripper</li>
+  <li>Place position up to place standoff position</li>
+</ol>
+
+<p>These trajectory segments are generated as Cartesian (straight-line) or Screw (following a screw axis) trajectories based on the demands of each segment. Each point in the reference trajectory is defined by an SE(3) transformation matrix defining the position and orientation of the end-effector in the fixed world frame.</p>
+
+<p>You can see the different trajectory segments in the below video (which also includes feedforward + feedback control to eliminate error in the beginning of the first segment).</p>
+
+<div style="width: 50%; margin: 0 auto;">
+    <div class="video-wrapper">
+        <iframe src="https://www.youtube.com/embed/0QBEBswZAlI" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen=""></iframe>
+    </div>
+</div>
+<p><br /></p>
+
+<h3 id="milestone-3-feedforwardfeedback-control">Milestone 3: Feedforward/Feedback Control</h3>
+<p>The final aspect of the core project is feedforward/feedback control. In the simulation, the youBot may not start exactly at the desired starting position of the reference trajectory. To correct for this, feedforward and PI control is used to correct any error in the starting position by the end of the first trajectory segment, so the robot is successful in picking up the block.</p>
+
+<p>The control law calculates an error twist based on actual position of the end-effector, the desired position of the end-effector, and the chosen feedback gains. This error twist is turned into command velocities using the full Jacobian of the youBot, which is constructed from the Jacobian of the manipulator arm and the characteristics of the omnidirectional wheelbase.</p>
+
+<p>Finally, putting all the milestones together into a single workflow allows a CSV of joint/wheel/chassis states to be created, which defines the motion of the youBot in the simulation.</p>
+
+<h3 id="self-collision-avoidance">Self-Collision Avoidance</h3>
+<p>Because dynamics and collisions of the youBot chassis/links are not being simulated in Milestone 1 or CoppeliaSim, with just the core project it is very possible for the youBot to collide with itself. In fact, without including collision avoidance, self-collisions were prone to happen. The method used to calculate command velocities uses the pseudoinverse of the youBot’s Jacobian, which minimizes the motion needed to keep the end-effector on the target trajectory. Minimizing motion often coincides with movements that produce self-collision.</p>
+
+<p>To handle this, I built in collision avoidance by including limits on the motion of the joints. To do so, feedforward/feedback control is calculated first, to get commanded velocities. Then the next timestep’s joint positions are simulated. If any joints exceed their joint limits, that joint’s column in the youBot’s Jacobian is set to 0. This essentially mathematically states that motion of that joint will not affect the end-effector position, so a velocity of that joint is not commanded. After doing so, feedforward/feedback control is recalculated, and the process is repeated until no joint limit violations are detected.</p>
+
+<p>This worked very effectively in preventing self-collisions. The previous videos on this page all have collision avoidance active, but as an illustration of its effect, here is a video without collision avoidance:</p>
+
+<div style="width: 50%; margin: 0 auto;">
+    <div class="video-wrapper">
+        <iframe src="https://www.youtube.com/embed/csmE6v4PY44" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen=""></iframe>
+    </div>
+</div>
+
+<hr />
+
+<h2 id="future-work">Future Work</h2>
+<p>One area that could be improved in this solution would be trajectory timing. Right now, several time parameters (total time, gripper actuation time, standoff motion time) must be passed into the reference trajectory generation function in order for it to generate a reference trajectory. The behavior of the youBot can be very sensitive to these timing parameters. Generally longer times aren’t an issue, but if the total time for the simulation is too short, the youBot’s control algorithm will have to deal with very large errors due to high required speeds and will not work well.</p>
+
+<p>One solution to this would be modifying the reference trajectory generation function to use the maximum speed of joints/wheels to determine a reasonable total time for the task and generate a reference trajectory accordingly. This would reduce the possibility of having the feedback/feedforward control malfunction due to large errors caused by high speed demands.</p>
+
+	</div>
+</section>
+
+</div>
+
+    <!-- Contact -->
+<!--
+<section id="contact">
+	<div class="inner">
+		<section>
+			<form action="https://formspree.io/nicolasgmorales@u.northwestern.edu" method="POST">
+				<div class="field half first">
+					<label for="name">Name</label>
+					<input type="text" name="name" id="name" />
+				</div>
+				<div class="field half">
+					<label for="email">Email</label>
+					<input type="text" name="_replyto" id="email" />
+				</div>
+				<div class="field">
+					<label for="message">Message</label>
+					<textarea name="message" id="message" rows="6"></textarea>
+				</div>
+				<ul class="actions">
+					<li><input type="submit" value="Send Message" class="special" /></li>
+					<li><input type="reset" value="Clear" /></li>
+				</ul>
+			</form>
+		</section>
+		<section class="split">
+			<section>
+				<div class="contact-method">
+					<span class="icon alt fa-envelope"></span>
+					<h3>Email</h3>
+					<a href="mailto:nicolasgmorales@u.northwestern.edu">nicolasgmorales@u.northwestern.edu</a>
+				</div>
+			</section>
+			<section>
+				<div class="contact-method">
+					<span class="icon alt fa-phone"></span>
+					<h3>Phone</h3>
+					<a href="tel:(937) 776-0843">(937) 776-0843</a>
+				</div>
+			</section>
+			<section>
+				<div class="contact-method">
+					<span class="icon alt fa-home"></span>
+					<h3>Address</h3>
+					<span>
+					
+					
+					    Chicago,
+					
+					
+					    IL 
+					
+					
+					
+					    United States of America
+					
+					</span>
+				</div>
+			</section>
+		</section>
+	</div>
+</section>
+-->
+<!-- Footer -->
+	<footer id="footer">
+		<div class="inner">
+			<ul class="icons">
+    <li><a href="mailto:nicolasgmorales@u.northwestern.edu" class="icon alt fa-envelope"></a></li>
+    <li><a href="tel:(937) 776-0843" class="icon alt fa-phone"></a></li>
+    
+        
+            <li>
+                <a href="https://www.linkedin.com/in/nicolasgmorales/" class="icon alt fa-linkedin" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
+                    <span class="label">LinkedIn</span>
+                </a>
+            </li>
+        
+    
+        
+            <li>
+                <a href="https://github.com/ngmor" class="icon alt fa-github" target="_blank" rel="noopener noreferrer" aria-label="GitHub">
+                    <span class="label">GitHub</span>
+                </a>
+            </li>
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+</ul>
+			<!--
+			<ul class="icons">
+				<li><a href="mailto:nicolasgmorales@u.northwestern.edu" class="icon alt fa-envelope"></a></li>
+				<li><a href="tel:(937) 776-0843" class="icon alt fa-phone"></a></li>
+				
+					
+						<li>
+							<a href="https://www.linkedin.com/in/nicolasgmorales/" class="icon alt fa-linkedin" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
+								<span class="label">LinkedIn</span>
+							</a>
+						</li>
+					
+				
+					
+						<li>
+							<a href="https://github.com/ngmor" class="icon alt fa-github" target="_blank" rel="noopener noreferrer" aria-label="GitHub">
+								<span class="label">GitHub</span>
+							</a>
+						</li>
+					
+				
+					
+				
+					
+				
+					
+				
+					
+				
+					
+				
+					
+				
+			</ul>
+			-->
+			<ul class="copyright">
+				<li>&copy; <script>document.write(new Date().getFullYear())</script> Nicolas G. Morales </li>
+				<li>Design: <a href="https://html5up.net" target="_blank">HTML5 UP</a></li>
+				<li>Jekyll integration: <a href="http://andrewbanchi.ch" target="_blank">Andrew Banchich</a></li>
+
+			</ul>
+		</div>
+	</footer>
+
+</div>
+
+<!-- Scripts -->
+	<script src="https://ngmor.github.io/assets/js/jquery.min.js"></script>
+	<script src="https://ngmor.github.io/assets/js/jquery.scrolly.min.js"></script>
+	<script src="https://ngmor.github.io/assets/js/jquery.scrollex.min.js"></script>
+	<script src="https://ngmor.github.io/assets/js/skel.min.js"></script>
+	<script src="https://ngmor.github.io/assets/js/util.js"></script>
+	<!--[if lte IE 8]><script src="https://ngmor.github.io/assets/js/ie/respond.min.js"></script><![endif]-->
+	<script src="https://ngmor.github.io/assets/js/main.js"></script>
+	<!-- <script src="/js/zepto.min.js"></script>
+	<script>jQuery = Zepto;</script> -->
+	<script src="https://ngmor.github.io/assets/js/jquery.details.min.js"></script>
+	<script>$('details').details();</script>
+
+</body>
+
+</html>

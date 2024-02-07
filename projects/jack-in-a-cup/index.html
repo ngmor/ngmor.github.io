@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<!--
+	Forty by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+
+<head>
+	<title>Jack in a Cup Simulation | Nicolas G. Morales</title>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+	<!--[if lte IE 8]><script src="/assets/js/ie/html5shiv.js"></script><![endif]-->
+	<link rel="stylesheet" href="/assets/css/main.css" />
+	<!--[if lte IE 9]><link rel="stylesheet" href="/assets/css/ie9.css" /><![endif]-->
+	<!--[if lte IE 8]><link rel="stylesheet" href="/assets/css/ie8.css" /><![endif]-->
+</head>
+
+
+<body>
+
+    <!-- Wrapper -->
+<div id="wrapper">
+
+<!-- Header -->
+<header id="header">
+	
+		<a href="https://ngmor.github.io/" class="logo"><strong>Portfolio</strong> <span>Nicolas G. Morales</span></a>
+	
+	
+	<nav>
+		<a href="#menu">Menu</a>
+	</nav>
+</header>
+
+<!-- Menu -->
+<nav id="menu">
+	<ul class="links">
+        
+		    
+		
+		    
+		
+		    
+		
+		    
+				
+					<li><a href="https://ngmor.github.io/">Home</a></li>
+				
+	    	
+		
+		    
+		
+		    
+		
+		    
+		
+		
+		    
+		
+		    
+		        <li><a href="https://ngmor.github.io/about.html">About Me</a></li>
+		    
+		
+		    
+		        <li><a href="https://ngmor.github.io/contact.html">Contact</a></li>
+		    
+		
+		    
+		
+		    
+		        <li><a href="https://ngmor.github.io/projects.html">Projects</a></li>
+		    
+		
+		    
+		        <li><a href="https://ngmor.github.io/resume.html">Resume</a></li>
+		    
+		
+	</ul>
+	<!--
+	<ul class="actions vertical">
+		<li><a href="#" class="button special fit">Get Started</a></li>
+		<li><a href="#" class="button fit">Log In</a></li>
+	</ul>
+	-->
+</nav>
+ 
+    
+    
+<!-- Main -->
+<div id="main" class="alt">
+
+<!-- One -->
+<section id="one">
+	<div class="inner">
+		<header class="major">
+			<h1>Jack in a Cup Simulation</h1>
+		</header>
+		<div><strong>Technologies:</strong> Python, Lagrangian Dynamics</div><br>
+		
+			
+		
+		<p><a href="https://github.com/ngmor/machine-dynamics-final">GitHub Repository</a></p>
+
+<p>Northwestern University’s ME314 Machine Dynamics class focuses on analysis of rigid body systems using <a href="https://en.wikipedia.org/wiki/Lagrangian_mechanics"><strong>Lagrangian dynamics</strong></a>, including how to deal with external forces, constraints, and impacts. The class also puts a heavy emphasis on using numerical methods and <strong>Python’s</strong> <a href="https://www.sympy.org/en/index.html"><strong>sympy</strong></a>, <a href="https://numpy.org/"><strong>numpy</strong></a>, and <a href="https://plotly.com/python/"><strong>plotly</strong></a> packages to simulate system behavior and then animate that simulation.</p>
+
+<p>As a final project in the class, students model a dynamic rigid body system, simulate it, and animate it. I modeled a jack bouncing around in a cup. Both these rigid bodies are subject to gravity, and the cup is subject to two orthogonal external forces and an external torque (to mimic a human shaking it).</p>
+
+<p>Here is a video of the final simulation:</p>
+
+<div style="width: 75%; margin: 0 auto;">
+    <div class="video-wrapper">
+        <iframe src="https://www.youtube.com/embed/AhWuadxF710" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen=""></iframe>
+    </div>
+</div>
+<p><br /></p>
+
+<hr />
+
+<h2 id="overview-of-methodology">Overview of Methodology</h2>
+<p>The system consists of two rigid bodies, the jack and the cup, simulated in a 2D plane. Each body has 3 degrees of freedom (orientation and 2D position), giving a total of 6 configuration variables for the system.</p>
+
+<p style="text-align: center;"><img src="/assets/images/jack-in-a-cup/configuration.png" alt="System configuration variables" width="25%" /></p>
+<p style="text-align: center;"><em>The system’s configuration variables.</em></p>
+
+<p>The dynamics modeling of the system relies heavily on SE(3) transformation matrices to describe transformations between reference frames. These are used not only to construct the Lagrangian and Euler-Lagrange equations, but also to detect impact conditions and apply impact updates.</p>
+
+<p style="text-align: center;"><img src="/assets/images/jack-in-a-cup/cup-dimensions.png" alt="Cup dimensions and frames" width="25%" style="padding-right: 5%;" />
+<img src="/assets/images/jack-in-a-cup/jack-dimensions.png" alt="Jack dimensions and frames" width="10%" style="padding-bottom: 6.5%;" /></p>
+<p style="text-align: center;"><em>Cup and jack dimensions and frames.</em></p>
+
+<p>All impacts are considered elastic. Because simultaneous impacts in elastic systems are underspecified, simultaneous impacts were ignored and treated as just single impacts.</p>
+
+<p>For more information on the system and other modeling choices, see the project’s detailed description in the <a href="https://github.com/ngmor/machine-dynamics-final/blob/main/final.ipynb">Jupyter Notebook</a>.</p>
+
+<p>The simulation follows these steps:</p>
+<ol>
+  <li>Define the system state variables.</li>
+  <li>Define frames to describe the system using the state variables.</li>
+  <li>Define kinetic and potential energies in the system using the state variables and other system information.</li>
+  <li>Define external forces/torques.</li>
+  <li>Construct the system Lagrangian.</li>
+  <li>Derive the system Euler-Lagrange equations.</li>
+  <li>Solve the system Euler-Lagrange equations for the second derivatives of the state variables.</li>
+  <li>Define impact conditions based on the system geometry.</li>
+  <li>Derive impact update equations based on the impact conditions and assuming elastic impact.</li>
+  <li>Simulate for a 5 second timespan using a timestep of 0.01 seconds.
+    <ul>
+      <li>Calculate the state at each timestep using the solutions to the Euler-Lagrange equations and a Runge-Kutta fourth-order integration scheme.</li>
+      <li>Check all impact conditions at each timestep. If impacts occurred, apply the appropriate impact update and resume the simulation.</li>
+    </ul>
+  </li>
+  <li>Animate simulation results.</li>
+</ol>
+
+<hr />
+
+<h2 id="conclusions">Conclusions</h2>
+<p>The Lagrangian dynamics analysis method - especially when used in concert with SE(3) transformation matrices - gives a procedural way to analyze a system. I find this method very useful especially when systems are more complex than basic, simple systems with only a few configuration variables, as most engineering systems are. The behavior of these complex systems can be very difficult to predict, so having a procedural method of analysis helps me trust that my analysis will be correct.</p>
+
+<p>On top of that, from this class I’ve learned the value of visualizing simulations, especially with animations. Solutions to the Euler-Lagrange equations can be quite messy, and are often hard to interpret just from looking at them. However, an animation provides a visual whose validity can be judged much more easily using physical intuition. Of course, other tools like analyzing conserved quantities are also critical for judging the validity of a solution.</p>
+
+<p>I’ve gained an appreciation for how quickly systems can become complex. This system itself is fairly simple in the grand scheme of things - only six configuration and sixteen impact conditions between two rigid bodies. And yet finding symbolic solutions and simulating still takes a few minutes. As more rigid bodies and configuration variables are added, systems very quickly become very complex and take long amounts of time to solve. For these reasons, it’s important to be smart when defining a system, make simplifications when necessary, and pay attention to code efficiency when simulating complex systems.</p>
+
+<p>Finally, I’ve learned that because systems become so complex, it’s important to understand that these simplifications and modeling choices exist in any simulation out there. For example, my choice to treat simultaneous impacts as single impacts seemed to work well enough for this system, but it might cause huge problems in another simulation. Being cognizant of these choices can be very important when analyzing simulation behavior and understanding how the simulation will differ from system behavior in the real world.</p>
+
+	</div>
+</section>
+
+</div>
+
+    <!-- Contact -->
+<!--
+<section id="contact">
+	<div class="inner">
+		<section>
+			<form action="https://formspree.io/nicolasgmorales@u.northwestern.edu" method="POST">
+				<div class="field half first">
+					<label for="name">Name</label>
+					<input type="text" name="name" id="name" />
+				</div>
+				<div class="field half">
+					<label for="email">Email</label>
+					<input type="text" name="_replyto" id="email" />
+				</div>
+				<div class="field">
+					<label for="message">Message</label>
+					<textarea name="message" id="message" rows="6"></textarea>
+				</div>
+				<ul class="actions">
+					<li><input type="submit" value="Send Message" class="special" /></li>
+					<li><input type="reset" value="Clear" /></li>
+				</ul>
+			</form>
+		</section>
+		<section class="split">
+			<section>
+				<div class="contact-method">
+					<span class="icon alt fa-envelope"></span>
+					<h3>Email</h3>
+					<a href="mailto:nicolasgmorales@u.northwestern.edu">nicolasgmorales@u.northwestern.edu</a>
+				</div>
+			</section>
+			<section>
+				<div class="contact-method">
+					<span class="icon alt fa-phone"></span>
+					<h3>Phone</h3>
+					<a href="tel:(937) 776-0843">(937) 776-0843</a>
+				</div>
+			</section>
+			<section>
+				<div class="contact-method">
+					<span class="icon alt fa-home"></span>
+					<h3>Address</h3>
+					<span>
+					
+					
+					    Chicago,
+					
+					
+					    IL 
+					
+					
+					
+					    United States of America
+					
+					</span>
+				</div>
+			</section>
+		</section>
+	</div>
+</section>
+-->
+<!-- Footer -->
+	<footer id="footer">
+		<div class="inner">
+			<ul class="icons">
+    <li><a href="mailto:nicolasgmorales@u.northwestern.edu" class="icon alt fa-envelope"></a></li>
+    <li><a href="tel:(937) 776-0843" class="icon alt fa-phone"></a></li>
+    
+        
+            <li>
+                <a href="https://www.linkedin.com/in/nicolasgmorales/" class="icon alt fa-linkedin" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
+                    <span class="label">LinkedIn</span>
+                </a>
+            </li>
+        
+    
+        
+            <li>
+                <a href="https://github.com/ngmor" class="icon alt fa-github" target="_blank" rel="noopener noreferrer" aria-label="GitHub">
+                    <span class="label">GitHub</span>
+                </a>
+            </li>
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+</ul>
+			<!--
+			<ul class="icons">
+				<li><a href="mailto:nicolasgmorales@u.northwestern.edu" class="icon alt fa-envelope"></a></li>
+				<li><a href="tel:(937) 776-0843" class="icon alt fa-phone"></a></li>
+				
+					
+						<li>
+							<a href="https://www.linkedin.com/in/nicolasgmorales/" class="icon alt fa-linkedin" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
+								<span class="label">LinkedIn</span>
+							</a>
+						</li>
+					
+				
+					
+						<li>
+							<a href="https://github.com/ngmor" class="icon alt fa-github" target="_blank" rel="noopener noreferrer" aria-label="GitHub">
+								<span class="label">GitHub</span>
+							</a>
+						</li>
+					
+				
+					
+				
+					
+				
+					
+				
+					
+				
+					
+				
+					
+				
+			</ul>
+			-->
+			<ul class="copyright">
+				<li>&copy; <script>document.write(new Date().getFullYear())</script> Nicolas G. Morales </li>
+				<li>Design: <a href="https://html5up.net" target="_blank">HTML5 UP</a></li>
+				<li>Jekyll integration: <a href="http://andrewbanchi.ch" target="_blank">Andrew Banchich</a></li>
+
+			</ul>
+		</div>
+	</footer>
+
+</div>
+
+<!-- Scripts -->
+	<script src="https://ngmor.github.io/assets/js/jquery.min.js"></script>
+	<script src="https://ngmor.github.io/assets/js/jquery.scrolly.min.js"></script>
+	<script src="https://ngmor.github.io/assets/js/jquery.scrollex.min.js"></script>
+	<script src="https://ngmor.github.io/assets/js/skel.min.js"></script>
+	<script src="https://ngmor.github.io/assets/js/util.js"></script>
+	<!--[if lte IE 8]><script src="https://ngmor.github.io/assets/js/ie/respond.min.js"></script><![endif]-->
+	<script src="https://ngmor.github.io/assets/js/main.js"></script>
+	<!-- <script src="/js/zepto.min.js"></script>
+	<script>jQuery = Zepto;</script> -->
+	<script src="https://ngmor.github.io/assets/js/jquery.details.min.js"></script>
+	<script>$('details').details();</script>
+
+</body>
+
+</html>

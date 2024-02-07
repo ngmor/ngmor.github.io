@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<!--
+	Forty by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+
+<head>
+	<title>EKF SLAM from Scratch | Nicolas G. Morales</title>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+	<!--[if lte IE 8]><script src="/assets/js/ie/html5shiv.js"></script><![endif]-->
+	<link rel="stylesheet" href="/assets/css/main.css" />
+	<!--[if lte IE 9]><link rel="stylesheet" href="/assets/css/ie9.css" /><![endif]-->
+	<!--[if lte IE 8]><link rel="stylesheet" href="/assets/css/ie8.css" /><![endif]-->
+</head>
+
+
+<body>
+
+    <!-- Wrapper -->
+<div id="wrapper">
+
+<!-- Header -->
+<header id="header">
+	
+		<a href="https://ngmor.github.io/" class="logo"><strong>Portfolio</strong> <span>Nicolas G. Morales</span></a>
+	
+	
+	<nav>
+		<a href="#menu">Menu</a>
+	</nav>
+</header>
+
+<!-- Menu -->
+<nav id="menu">
+	<ul class="links">
+        
+		    
+		
+		    
+		
+		    
+		
+		    
+				
+					<li><a href="https://ngmor.github.io/">Home</a></li>
+				
+	    	
+		
+		    
+		
+		    
+		
+		    
+		
+		
+		    
+		
+		    
+		        <li><a href="https://ngmor.github.io/about.html">About Me</a></li>
+		    
+		
+		    
+		        <li><a href="https://ngmor.github.io/contact.html">Contact</a></li>
+		    
+		
+		    
+		
+		    
+		        <li><a href="https://ngmor.github.io/projects.html">Projects</a></li>
+		    
+		
+		    
+		        <li><a href="https://ngmor.github.io/resume.html">Resume</a></li>
+		    
+		
+	</ul>
+	<!--
+	<ul class="actions vertical">
+		<li><a href="#" class="button special fit">Get Started</a></li>
+		<li><a href="#" class="button fit">Log In</a></li>
+	</ul>
+	-->
+</nav>
+ 
+    
+    
+<!-- Main -->
+<div id="main" class="alt">
+
+<!-- One -->
+<section id="one">
+	<div class="inner">
+		<header class="major">
+			<h1>EKF SLAM from Scratch</h1>
+		</header>
+		<div><strong>Technologies:</strong> C++, ROS 2, TurtleBot3</div><br>
+		
+			
+		
+		<p><a href="https://github.com/ngmor/turtlebot3-ekf-slam">GitHub Repository</a></p>
+
+<p>Northwestern University’s ME495 Sensing, Navigation, and Machine Learning class is centered around one large project: implementing feature-based Extended Kalman Filter Simultaneous Localization and Mapping (SLAM) on a <strong>TurtleBot3</strong> using <strong>C++</strong> and <strong>ROS 2 Humble</strong>.</p>
+
+<p>During this class I created several packages from scratch to accomplish this task in both simulation and with a real robot.</p>
+
+<div style="width: 75%; margin: 0 auto;">
+    <div class="video-wrapper">
+        <iframe src="https://www.youtube.com/embed/nGgL-F-9Thc" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen=""></iframe>
+    </div>
+</div>
+
+<p><br /></p>
+
+<p>The video above shows this project in action. The RVIZ window on the right shows several key features:</p>
+<ul>
+  <li>LiDAR point data (yellow dots)</li>
+  <li>Robot odometry position estimate (blue robot)</li>
+  <li>Robot EKF SLAM position estimate (green robot)</li>
+  <li>Landmark EKF SLAM position estimate (green cylinders)</li>
+</ul>
+
+<p>As can be seen, the EKF SLAM estimate follows the real-world position of the robot closely, even as the odometry estimate drifts.</p>
+
+<details><summary><strong><u>Table of Contents</u></strong></summary>
+<ul>
+  <li><a href="#slam-pipeline">SLAM Pipeline</a>
+    <ul>
+      <li><a href="#odometry">Odometry</a></li>
+      <li><a href="#landmark-detection-and-data-association">Landmark Detection and Data Association</a>
+        <ul>
+          <li><a href="#point-clustering">Point Clustering</a></li>
+          <li><a href="#circle-classification-and-regression">Circle Classification and Regression</a></li>
+          <li><a href="#mahalanobis-distance">Mahalanobis Distance</a></li>
+        </ul>
+      </li>
+      <li><a href="#extended-kalman-filter-slam">Extended Kalman Filter SLAM</a>
+        <ul>
+          <li><a href="#prediction">Prediction</a></li>
+          <li><a href="#correction">Correction</a></li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li><a href="#simulation">Simulation</a></li>
+</ul>
+
+</details>
+
+<hr />
+
+<h2 id="slam-pipeline">SLAM Pipeline</h2>
+
+<p>This project’s EKF SLAM pipeline relies on data from two sensors: encoders in the robot’s wheel motors and a 2D LiDAR on top of the robot. This data is used in conjunction with previous state estimates to estimate the current state of the robot and landmarks in a controlled environment.</p>
+
+<p style="text-align: center;"><img src="/assets/images/ekf-slam-from-scratch/state-estimation.svg" alt="EKF SLAM Pipeline" width="35%" /></p>
+<p style="text-align: center;"><em>The Extended Kalman Filter SLAM pipeline used for this project.</em></p>
+
+<h3 id="odometry">Odometry</h3>
+<p>Wheel encoder data arrives at 200 Hz, much faster than the LiDAR data at 5Hz. For this reason it can be used for state estimates in between the SLAM updates.</p>
+
+<p>Odometry uses the forward kinematics of the TurtleBot3’s differential drive design to calculate the theoretical location of the robot based on how the wheels have turned, assuming no slipping occurs.</p>
+
+<p>However, slipping does in fact occur, meaning that over time the odometry estimate will drift away from the real location of the robot. This can be seen in the video above.</p>
+
+<h3 id="landmark-detection-and-data-association">Landmark Detection and Data Association</h3>
+<p>We’d like to improve the state estimate from odometry by looking at data from the world around us. This is where the 2D LiDAR data comes in. Our controlled environment has cylindrical obstacles in it, which can be used as landmarks for positioning the robot in the environment.</p>
+
+<p>However, the LiDAR data comes in as a series of data points giving us how far away an object is (<strong>range</strong>) and the angle from the front of the robot (<strong>bearing</strong>). In order to interpret this data as “cylinders,” it’ll have to be processed a few different ways.</p>
+
+<p style="text-align: center;"><img src="/assets/images/ekf-slam-from-scratch/raw-lidar-data.png" alt="Raw LiDAR data" width="50%" /></p>
+<p style="text-align: center;"><em>Raw LiDAR data, which won’t mean much until processed.</em></p>
+
+<h4 id="point-clustering">Point Clustering</h4>
+<p>First, a simple unsupervised DBSCAN-like learning algorithm is used to group the LiDAR points into clusters based on their Euclidean distance from each other. Each cluster is considered a possible landmark.</p>
+
+<h4 id="circle-classification-and-regression">Circle Classification and Regression</h4>
+<p>Clusters are filtered using a <a href="https://ieeexplore.ieee.org/document/1570721">circle detection algorithm</a> to determine which are likely to represent cylindrical landmarks and which are not.</p>
+
+<p>Then, a supervised learning algorithm performs <a href="https://projecteuclid.org/journals/electronic-journal-of-statistics/volume-3/issue-none/Error-analysis-for-circle-fitting-algorithms/10.1214/09-EJS419.full">Gaussian process regression</a> to determine the best fit circle for each cluster of points. If the radius of the fit circle is too large or small (based on adjustable thresholds), a certain cluster is thrown out.</p>
+
+<p>The center of the remaining circles is considered the coordinates of a detected landmark.</p>
+
+<p style="text-align: center;"><img src="/assets/images/ekf-slam-from-scratch/clusters-and-circles.png" alt="Processed clusters and circles." width="50%" /></p>
+<p style="text-align: center;"><em>Detected clusters (orange cylinders) and detected circles (yellow cylinders).</em></p>
+
+<p>As can be seen above, although the environment walls still appear as clusters, the circle classification/filtering successfully identifies only the actual landmarks.</p>
+
+<h4 id="mahalanobis-distance">Mahalanobis Distance</h4>
+<p>Finally, the detected landmarks must be associated with previously witnessed landmarks. This is done using <a href="https://en.wikipedia.org/wiki/Mahalanobis_distance">Mahalanobis distance</a>, which takes into account the covariance of the previous detections. If a detected landmark has a Mahalanobis distance less than a certain adjustable threshold to a previous detection, it is considered another detection of that landmark. If a landmark is above that threshold for all previous detection, it is considered a new landmark detection.</p>
+
+<p style="text-align: center;"><img src="/assets/images/ekf-slam-from-scratch/associated-landmarks.png" alt="Processed clusters and circles." width="50%" /></p>
+<p style="text-align: center;"><em>After data association, fit circles can be recognized as landmarks in the environment.</em></p>
+
+<p>This finally allows us to transform raw 2D LiDAR into associated landmarks, which will help us position the robot during SLAM updates.</p>
+
+<h3 id="extended-kalman-filter-slam">Extended Kalman Filter SLAM</h3>
+<p>Now that we have landmark data to help localize the robot within the environment, feature-based Extended Kalman Filter SLAM can be performed. There are two steps to this, <strong>prediction</strong> and <strong>correction</strong>.</p>
+
+<h4 id="prediction">Prediction</h4>
+<p>In the prediction step, the difference in odometry between the current and last SLAM updates is used to predict a new state and covariance of the robot. Because odometry inaccuracies can accumulate over time, this prediction may not be accurate.</p>
+
+<h4 id="correction">Correction</h4>
+<p>In the correction step, the detected landmarks are used to iteratively update the predicted state. Kalman gains are calculated by taking into account the expected location of the landmark (based on the state prediction) and its actual detected location. Then the robot state and covariance are updated appropriately.</p>
+
+<p>The result is a much more accurate position for the robot than can be obtained from odometry alone.</p>
+
+<hr />
+
+<h2 id="simulation">Simulation</h2>
+<p>In order to test the complex pipeline above, I wrote a simulation package. This package essentially replaces the real robot by simulating the sensor data and motion of the robot. It has adjustable parameters for simulating sensor noise and wheel slippage.</p>
+
+<p>Here is a video of the EKF SLAM pipeline working in simulation.</p>
+
+<div style="width: 75%; margin: 0 auto;">
+    <div class="video-wrapper">
+        <iframe src="https://www.youtube.com/embed/ls9A1shaAQg" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen=""></iframe>
+    </div>
+</div>
+
+<p><br /></p>
+
+<p>Here’s a key for interpreting the items in the video:</p>
+<ul>
+  <li><strong>Red</strong> - the simulation’s ground truth location for items including:
+    <ul>
+      <li>Robot position</li>
+      <li>Landmark/wall position</li>
+      <li>Robot path</li>
+    </ul>
+  </li>
+  <li><strong>Blue</strong> - the odometry estimate for items including:
+    <ul>
+      <li>Robot position</li>
+      <li>Robot path</li>
+    </ul>
+  </li>
+  <li><strong>Green</strong> - the EKF SLAM estimate for items including:
+    <ul>
+      <li>Robot position</li>
+      <li>Landmark/wall position</li>
+      <li>Robot path</li>
+    </ul>
+  </li>
+</ul>
+
+<p>As can be seen, despite simulation noise and even running into an obstacle and getting stuck, the EKF SLAM estimate stays with the ground truth robot position. The odometry estimate has no way to detect a collision if the wheels continue to slip on the ground, so its position estimate is very inaccurate.</p>
+
+<p>The simulation was invaluable in debugging the pipeline and ensuring it was resistant to sensor noise. When it came to running on the real robot, several pipeline parameters had to be retuned, indicating that the simulation was not very representative of the noise/slippage present in the real world. This was a great lesson to learn - simulations can be very valuable tools, but you won’t know if something works on a real robot until you try it!</p>
+
+	</div>
+</section>
+
+</div>
+
+    <!-- Contact -->
+<!--
+<section id="contact">
+	<div class="inner">
+		<section>
+			<form action="https://formspree.io/nicolasgmorales@u.northwestern.edu" method="POST">
+				<div class="field half first">
+					<label for="name">Name</label>
+					<input type="text" name="name" id="name" />
+				</div>
+				<div class="field half">
+					<label for="email">Email</label>
+					<input type="text" name="_replyto" id="email" />
+				</div>
+				<div class="field">
+					<label for="message">Message</label>
+					<textarea name="message" id="message" rows="6"></textarea>
+				</div>
+				<ul class="actions">
+					<li><input type="submit" value="Send Message" class="special" /></li>
+					<li><input type="reset" value="Clear" /></li>
+				</ul>
+			</form>
+		</section>
+		<section class="split">
+			<section>
+				<div class="contact-method">
+					<span class="icon alt fa-envelope"></span>
+					<h3>Email</h3>
+					<a href="mailto:nicolasgmorales@u.northwestern.edu">nicolasgmorales@u.northwestern.edu</a>
+				</div>
+			</section>
+			<section>
+				<div class="contact-method">
+					<span class="icon alt fa-phone"></span>
+					<h3>Phone</h3>
+					<a href="tel:(937) 776-0843">(937) 776-0843</a>
+				</div>
+			</section>
+			<section>
+				<div class="contact-method">
+					<span class="icon alt fa-home"></span>
+					<h3>Address</h3>
+					<span>
+					
+					
+					    Chicago,
+					
+					
+					    IL 
+					
+					
+					
+					    United States of America
+					
+					</span>
+				</div>
+			</section>
+		</section>
+	</div>
+</section>
+-->
+<!-- Footer -->
+	<footer id="footer">
+		<div class="inner">
+			<ul class="icons">
+    <li><a href="mailto:nicolasgmorales@u.northwestern.edu" class="icon alt fa-envelope"></a></li>
+    <li><a href="tel:(937) 776-0843" class="icon alt fa-phone"></a></li>
+    
+        
+            <li>
+                <a href="https://www.linkedin.com/in/nicolasgmorales/" class="icon alt fa-linkedin" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
+                    <span class="label">LinkedIn</span>
+                </a>
+            </li>
+        
+    
+        
+            <li>
+                <a href="https://github.com/ngmor" class="icon alt fa-github" target="_blank" rel="noopener noreferrer" aria-label="GitHub">
+                    <span class="label">GitHub</span>
+                </a>
+            </li>
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+</ul>
+			<!--
+			<ul class="icons">
+				<li><a href="mailto:nicolasgmorales@u.northwestern.edu" class="icon alt fa-envelope"></a></li>
+				<li><a href="tel:(937) 776-0843" class="icon alt fa-phone"></a></li>
+				
+					
+						<li>
+							<a href="https://www.linkedin.com/in/nicolasgmorales/" class="icon alt fa-linkedin" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
+								<span class="label">LinkedIn</span>
+							</a>
+						</li>
+					
+				
+					
+						<li>
+							<a href="https://github.com/ngmor" class="icon alt fa-github" target="_blank" rel="noopener noreferrer" aria-label="GitHub">
+								<span class="label">GitHub</span>
+							</a>
+						</li>
+					
+				
+					
+				
+					
+				
+					
+				
+					
+				
+					
+				
+					
+				
+			</ul>
+			-->
+			<ul class="copyright">
+				<li>&copy; <script>document.write(new Date().getFullYear())</script> Nicolas G. Morales </li>
+				<li>Design: <a href="https://html5up.net" target="_blank">HTML5 UP</a></li>
+				<li>Jekyll integration: <a href="http://andrewbanchi.ch" target="_blank">Andrew Banchich</a></li>
+
+			</ul>
+		</div>
+	</footer>
+
+</div>
+
+<!-- Scripts -->
+	<script src="https://ngmor.github.io/assets/js/jquery.min.js"></script>
+	<script src="https://ngmor.github.io/assets/js/jquery.scrolly.min.js"></script>
+	<script src="https://ngmor.github.io/assets/js/jquery.scrollex.min.js"></script>
+	<script src="https://ngmor.github.io/assets/js/skel.min.js"></script>
+	<script src="https://ngmor.github.io/assets/js/util.js"></script>
+	<!--[if lte IE 8]><script src="https://ngmor.github.io/assets/js/ie/respond.min.js"></script><![endif]-->
+	<script src="https://ngmor.github.io/assets/js/main.js"></script>
+	<!-- <script src="/js/zepto.min.js"></script>
+	<script>jQuery = Zepto;</script> -->
+	<script src="https://ngmor.github.io/assets/js/jquery.details.min.js"></script>
+	<script>$('details').details();</script>
+
+</body>
+
+</html>

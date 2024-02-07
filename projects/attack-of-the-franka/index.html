@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<!--
+	Forty by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+
+<head>
+	<title>Attack of the Franka | Nicolas G. Morales</title>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+	<!--[if lte IE 8]><script src="/assets/js/ie/html5shiv.js"></script><![endif]-->
+	<link rel="stylesheet" href="/assets/css/main.css" />
+	<!--[if lte IE 9]><link rel="stylesheet" href="/assets/css/ie9.css" /><![endif]-->
+	<!--[if lte IE 8]><link rel="stylesheet" href="/assets/css/ie8.css" /><![endif]-->
+</head>
+
+
+<body>
+
+    <!-- Wrapper -->
+<div id="wrapper">
+
+<!-- Header -->
+<header id="header">
+	
+		<a href="https://ngmor.github.io/" class="logo"><strong>Portfolio</strong> <span>Nicolas G. Morales</span></a>
+	
+	
+	<nav>
+		<a href="#menu">Menu</a>
+	</nav>
+</header>
+
+<!-- Menu -->
+<nav id="menu">
+	<ul class="links">
+        
+		    
+		
+		    
+		
+		    
+		
+		    
+				
+					<li><a href="https://ngmor.github.io/">Home</a></li>
+				
+	    	
+		
+		    
+		
+		    
+		
+		    
+		
+		
+		    
+		
+		    
+		        <li><a href="https://ngmor.github.io/about.html">About Me</a></li>
+		    
+		
+		    
+		        <li><a href="https://ngmor.github.io/contact.html">Contact</a></li>
+		    
+		
+		    
+		
+		    
+		        <li><a href="https://ngmor.github.io/projects.html">Projects</a></li>
+		    
+		
+		    
+		        <li><a href="https://ngmor.github.io/resume.html">Resume</a></li>
+		    
+		
+	</ul>
+	<!--
+	<ul class="actions vertical">
+		<li><a href="#" class="button special fit">Get Started</a></li>
+		<li><a href="#" class="button fit">Log In</a></li>
+	</ul>
+	-->
+</nav>
+ 
+    
+    
+<!-- Main -->
+<div id="main" class="alt">
+
+<!-- One -->
+<section id="one">
+	<div class="inner">
+		<header class="major">
+			<h1>Attack of the Franka</h1>
+		</header>
+		<div><strong>Technologies:</strong> Python, ROS 2, OpenCV, Franka Emika Panda</div><br>
+		
+			
+		
+		<p><a href="https://github.com/ngmor/attack-of-the-franka">GitHub Repository</a></p>
+
+<p>For our final project in Northwestern University’s ME495 Embedded Systems in Robotics class, my team decided to program a 7-DoF <strong>Franka Emika Panda</strong> robotic arm to autonomously wield a lightsaber to help the Republic fight the Separatists.</p>
+
+<p>The robot (which we dubbed “Franakin Skywalker”) must draw the lightsaber from a sheath and swing it to knock over members of the Separatist Army, represented by red blocks placed upright on a work area table. Franakin will also need to avoid its ally blue blocks, representing members of the Republic. The setup of the allies and enemies in the work area is configured arbitrarily by a human.</p>
+
+<p>The <strong>Python</strong>-based system uses an <strong>Intel RealSense D435i</strong> and <strong>OpenCV</strong> to detect and differentiate the blocks and controls the robot arm via <strong>MoveIt</strong> in <strong>ROS 2</strong>.</p>
+
+<div style="width: 75%; margin: 0 auto;">
+    <div class="video-wrapper">
+        <iframe src="https://www.youtube.com/embed/bU8aNL9BQdQ" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen=""></iframe>
+    </div>
+</div>
+
+<p><br /></p>
+
+<details><summary><strong><u>Table of Contents</u></strong></summary>
+<ul>
+  <li><a href="#computer-vision">Computer Vision</a></li>
+  <li><a href="#motion">Motion</a></li>
+  <li><a href="#conclusions">Conclusions</a></li>
+  <li><a href="#future-work">Future Work</a></li>
+  <li><a href="#team-organization">Team Organization</a></li>
+</ul>
+</details>
+
+<hr />
+
+<h2 id="computer-vision">Computer Vision</h2>
+<p>The CV system consists of a few ROS 2 packages working in concert and tied together via a Python <code class="language-plaintext highlighter-rouge">camera_processor</code> node.</p>
+
+<p style="text-align: center;"><img src="/assets/images/attack-of-the-franka/camera-feed-simple.png" alt="Camera feed of a single ally and enemy" width="50%" /></p>
+<p style="text-align: center;"><em>A single ally and a single enemy, as seen from the RealSense’s camera feed.</em></p>
+
+<p>Color image data and depth data are published from the RealSense camera. An <strong>AprilTag</strong> detection package detects three AprilTags from this camera data, which help determine the relative location of the robot to the camera and the bounds of the work area.</p>
+
+<details><summary><strong><u>Expand</u></strong> for more technical details on the AprilTag system.</summary>
+<p>First, the <a href="https://github.com/IntelRealSense/realsense-ros">ROS 2 wrapper for Intel RealSense devices</a> is used to connect to the RealSense and publish color image data and depth data that is aligned with the color image camera reference frame.</p>
+
+<p>Next, the April Robotics <a href="https://github.com/AprilRobotics/apriltag">AprilTag library</a> is used along with Christian Rauch’s ROS 2 AprilTag <a href="https://github.com/christianrauch/apriltag_ros">node</a> and <a href="https://github.com/christianrauch/apriltag_msgs">messages</a> packages to detect AprilTags within the camera’s feed. These fiducial markers of known size allow for determination of the 6-DoF pose of the object to which they are attached.</p>
+
+<p>This project employs three tags - one to determine the location of the robot’s table and two to determine the bounds of the work area. In order to improve accuracy and consistency of the detected tags, we created a calibration process. Each tag’s transformation is sampled 100 times and the average taken and broadcast by the <code class="language-plaintext highlighter-rouge">camera_processor</code> node. If any tag is obscured from the camera - for example by a falling enemy - this average transformation is still retained and the system operation is not affected.</p>
+
+<p>Especially important was the robot table tag, the large tag shown in the left of the above feed. The size of this tag was increased to improve transformation accuracy. This tag was placed in a fixed location relative to the Panda’s base reference frame. Therefore, knowing the pose of this tag in the camera’s reference frame allowed us to know the position of the robot relative to the camera.</p>
+
+</details>
+
+<p><br /></p>
+
+<p style="text-align: center;"><img src="/assets/images/attack-of-the-franka/rviz-camera-simple.png" alt="Published frames of a single ally and enemy" width="50%" /></p>
+<p style="text-align: center;"><em>The TF tree and camera feed with overlaid frames, as represented in RVIZ.</em></p>
+
+<p>The <code class="language-plaintext highlighter-rouge">camera_processor</code> node then detects the blocks in the work area by their color, using the HSV color space, contouring, and a few filters to improve detection. The 2D pixel location of the blocks in the image is combined with depth data to determine the 3D relative position of the blocks with respect to the Panda arm.</p>
+
+<details><summary><strong><u>Expand</u></strong> for more technical details on the block detection system.</summary>
+<p>The <code class="language-plaintext highlighter-rouge">camera_processor</code> node subscribes to the color and aligned depth image data and processes it using OpenCV. The color data is converted into the HSV color space, which helps reduce problems in color detection caused by lighting changes. A certain range of HSV values representing red colors is defined as “enemy” and likewise another blue range defines “allies.”</p>
+
+<p>Pixels that fall into these ranges are grouped by <a href="https://docs.opencv.org/3.4/d4/d73/tutorial_py_contours_begin.html"><strong>contouring</strong></a>, and each contour is considered a detected object. <a href="https://docs.opencv.org/4.x/d9/d61/tutorial_py_morphological_ops.html">Opening and closing morphological transformations</a> are applied on the contours to improve their quality. Then, the centroid of each contour is calculated, which is considered the detected object’s position in the camera feed. This pixel position can be combined with the depth data for that pixel and deprojected into 3D real world coordinates of the object in the camera’s reference frame. Knowing the position of the object relative to the camera reference frame means that, since we already know the position of the robot relative to the camera, we can now determine the position of the detected objects relative to the robot.</p>
+
+<p>Finally, a few filters are applied to ensure we only consider detected objects we care about. The position of each object is compared with the work area bounds (as defined by the AprilTags), and any objects outside of the work bounds are filtered out. Also, each object’s depth from the camera is compared to a range from the location of the work table, and objects outside of that range are filtered out. This allows us to ignore enemies that have been knocked over, which we consider “vanquished.”</p>
+
+<p>The 3D real world coordinates of the detected objects are broadcast as transformations, which gives the motion subsystem the information needed to plan out the Panda’s attacks.</p>
+
+</details>
+
+<p><br /></p>
+
+<p style="text-align: center;"><img src="/assets/images/attack-of-the-franka/camera-feed-complex.png" alt="Camera feed of a multiple allies and enemies" width="43%" style="padding-right: 5%;" />
+<img src="/assets/images/attack-of-the-franka/rviz-camera-complex.png" alt="Published frames of a multiple allies and enemies" width="40%" /></p>
+<p style="text-align: center;"><em>As more objects are detected, the CV node publishes more frames accordingly.</em></p>
+
+<hr />
+
+<h2 id="motion">Motion</h2>
+<p>As of the completion of this project, no <a href="https://github.com/ros-planning/moveit2/issues/1279">Python bindings</a> were available for the <a href="https://moveit.ros.org/"><strong>MoveIt 2 Motion Planning Framework</strong></a>, which was critical to planning and executing motion for the complicated 7-DoF Panda arm. So in place of an official Python API, we simply made our own basic version.</p>
+
+<p>The API was implemented as a Python class, which is used inside of the Python <code class="language-plaintext highlighter-rouge">robot_control</code> node that handles all motion.</p>
+
+<details><summary><strong><u>Expand</u></strong> for more technical details on the API.</summary>
+<p>Our API handled:</p>
+<ul>
+  <li>Reading and publishing to the <code class="language-plaintext highlighter-rouge">planning scene</code> to ensure the robot and the lightsaber it wielded did not collide with objects in the environment</li>
+  <li>Interfacing with the <code class="language-plaintext highlighter-rouge">compute_ik</code> service to determine joint positions that would move the end-effector to a desired pose</li>
+  <li>Interfacing with the <code class="language-plaintext highlighter-rouge">move_action</code> action to plan a collision-free trajectory to the desired joint positions</li>
+  <li>Interfacing with the <code class="language-plaintext highlighter-rouge">execute_trajectory</code> action to execute previously planned trajectories</li>
+</ul>
+
+</details>
+
+<p><br /></p>
+
+<p style="text-align: center;"><img src="/assets/images/attack-of-the-franka/rviz-collision-objects.png" alt="Collision objects represented in RVIZ" width="50%" /></p>
+<p style="text-align: center;"><em>The planning scene represented in RVIZ, with the lightsaber grasped in the Panda’s grippers.</em></p>
+
+<p>By adding <strong>collision objects</strong> - like the walls, tables, and ceiling - to the planning scene, the MoveIt framework knows that the robot cannot move into or allow the lightsaber to collide with those objects.</p>
+
+<p>The robot’s first task is to draw its lightsaber from a fixed sheath attached to its table. In order to do this, we plan a trajectory to the fixed starting position of the lightsaber, grasp it, and return to ready position, avoiding collisions along the way.</p>
+
+<details><summary><strong><u>Expand</u></strong> for more technical details on the collision avoidance.</summary>
+<p>The lightsaber is added to the planning scene as a special <strong>attached collision object</strong> - meaning it moves with the robot and is allowed to collide with certain robot links (like the end-effector in which it is grasped). When grasping the lightsaber, it starts as a collision object so the arm will avoid it. Once grasped, the lightsaber changes to an attached collision object so collision-free trajectory plans account for it.</p>
+
+</details>
+
+<p><br /></p>
+
+<div style="width: 50%; margin: 0 auto;">
+    <div class="video-wrapper">
+        <iframe src="https://www.youtube.com/embed/sYgyu93i11Q" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen=""></iframe>
+    </div>
+</div>
+<p style="text-align: center;"><em>Picking up the lightsaber and a left swipe attack.</em></p>
+
+<p>From there, the robot has to plan its attacks. The <code class="language-plaintext highlighter-rouge">robot_control</code> node relies on the published transformations from the CV system to locate the detected objects. It prioritizes protecting its allies over knocking over enemies, so a single attack style is not sufficient to successfully vanquish most enemies. The Panda instead has an option of three attack styles: a <strong>left swipe</strong>, a <strong>right swipe</strong>, and a <strong>stab</strong>. These attack styles are prioritized in that order.</p>
+
+<div style="width: 50%; margin: 0 auto;">
+    <div class="video-wrapper">
+        <iframe src="https://www.youtube.com/embed/b1iG8R2p9XA" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen=""></iframe>
+    </div>
+</div>
+<p style="text-align: center;"><em>A right swipe attack.</em></p>
+
+<p>Once an attack style is selected, the node will plan and execute a trajectory for that attack. If multiple enemies are present in the scene, the robot will attack each one from left to right (from its perspective).</p>
+
+<p>After executing each attack, the camera is checked to see if the attack has been successful. The robot will retry if for some reason it missed or failed to knock over an enemy. If any enemy cannot be attacked due to the configuration of allies in the work area, that enemy is skipped.</p>
+
+<div style="width: 50%; margin: 0 auto;">
+    <div class="video-wrapper">
+        <iframe src="https://www.youtube.com/embed/MlOFW1IYV2c" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen=""></iframe>
+    </div>
+</div>
+<p style="text-align: center;"><em>A stab attack.</em></p>
+
+<details><summary><strong><u>Expand</u></strong> for more technical details on the attack planning.</summary>
+<p>The process for selecting an attack style has two checks. First, there is a simple geometric check - using the position of the objects from CV - to determine if a selected attack style will cause an enemy to fall into an ally. Secondly, the node attempts to plan motion to attack in that selected attack style. For this check, the allies are added as collision objects in the planning scene. If a collision were to occur during the motion, this plan fails.</p>
+
+<p>If either of these checks fail for a particular attack style, the same checks are attempted on the next attack style. If no attack style would successfully knock down an enemy without affecting an ally, the robot simply does not attack that enemy.</p>
+
+<p>These attacks use several joint state waypoints, adjusted for the position of the enemy, in order to ensure the motion planning reliably completes.</p>
+
+</details>
+
+<hr />
+
+<h2 id="conclusions">Conclusions</h2>
+<p>This project was a great opportunity to learn motion control of a real robot through ROS and unify it with computer vision.</p>
+
+<p>We learned several lessons through this project. Environmental factors such as lighting can have a heavy effect on computer vision systems, and the systems must be designed robustly enough to be able to handle different conditions that they might encounter. Furthermore, differences between real hardware and simulation are crucial to understand, especially when it comes to motion. Real life systems do not behave perfectly, and tolerances that can be achieved in simulation may be unattainable in reality. We encountered this especially when commanding fast motions of the arm, which produced larger errors in position than appeared in simulation.</p>
+
+<p>Overall I’m looking forward to more chances to design multi-faceted robotic systems with ROS!</p>
+
+<hr />
+
+<h2 id="future-work">Future Work</h2>
+
+<details><summary><strong>1. Improving motion planning robustness.</strong></summary>
+<p>The most impactful future improvement to this project would be to increase the robustness of the motion planning algorithms. With arbitrary enemy and ally positions, there are many scenarios and edge cases, not all of which the team was able to test. Planning for more of these edge cases and better defining specific motions to handle them would improve the performance of the system. Adding even more possible attack styles could also reduce the number of enemies that are unreachable due to configuration of allies in the work area.</p>
+
+</details>
+
+<details><summary><strong>2. Adding more object detection methods.</strong></summary>
+<p>This project was based on color detection as a central method of detecting and differentiating object types. It would be an exciting challenge to expand this object detection capability. For example, one could use <a href="https://pjreddie.com/darknet/yolo/">YOLO</a> or other neural networks to analyze the image and detect multiple different types of objects that represent allies and enemies based on a training dataset.</p>
+
+</details>
+
+<hr />
+
+<h2 id="team-organization">Team Organization</h2>
+<p>In order to complete this project in the span of just a few weeks, our team assigned roles and areas of focus for development (although each of us contributed to both the Computer Vision and Motion development). The team consisted of:</p>
+
+<table>
+  <tbody>
+    <tr>
+      <td><strong>Sushma Chandra</strong> - Usability Engineer, CV Development</td>
+      <td><strong>Vaishnavi Dornadula</strong> - Usability Engineer, Motion Development</td>
+    </tr>
+    <tr>
+      <td><strong>Nick Morales</strong> - Systems Integrator, CV Development</td>
+      <td><strong>Meg Sindelar</strong> - Reliability Engineer, Motion Development</td>
+    </tr>
+  </tbody>
+</table>
+
+<p style="text-align: center;"><img src="/assets/images/attack-of-the-franka/team.jpg" alt="The Attack of the Franka team" width="75%" /></p>
+
+<p style="text-align: center;"><em>The Attack of the Franka team!</em></p>
+
+<p>If you’d like to see more videos of the project, here’s a playlist of attack scenarios:</p>
+
+<div style="width: 75%; margin: 0 auto;">
+    <div class="video-wrapper">
+        <iframe src="https://www.youtube.com/embed/videoseries?list=PLIRnNSZSnm7PIFkpH2Ec_6OCljCXwIZlE" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen=""></iframe>
+    </div>
+</div>
+
+<p><br />
+<br /></p>
+
+
+	</div>
+</section>
+
+</div>
+
+    <!-- Contact -->
+<!--
+<section id="contact">
+	<div class="inner">
+		<section>
+			<form action="https://formspree.io/nicolasgmorales@u.northwestern.edu" method="POST">
+				<div class="field half first">
+					<label for="name">Name</label>
+					<input type="text" name="name" id="name" />
+				</div>
+				<div class="field half">
+					<label for="email">Email</label>
+					<input type="text" name="_replyto" id="email" />
+				</div>
+				<div class="field">
+					<label for="message">Message</label>
+					<textarea name="message" id="message" rows="6"></textarea>
+				</div>
+				<ul class="actions">
+					<li><input type="submit" value="Send Message" class="special" /></li>
+					<li><input type="reset" value="Clear" /></li>
+				</ul>
+			</form>
+		</section>
+		<section class="split">
+			<section>
+				<div class="contact-method">
+					<span class="icon alt fa-envelope"></span>
+					<h3>Email</h3>
+					<a href="mailto:nicolasgmorales@u.northwestern.edu">nicolasgmorales@u.northwestern.edu</a>
+				</div>
+			</section>
+			<section>
+				<div class="contact-method">
+					<span class="icon alt fa-phone"></span>
+					<h3>Phone</h3>
+					<a href="tel:(937) 776-0843">(937) 776-0843</a>
+				</div>
+			</section>
+			<section>
+				<div class="contact-method">
+					<span class="icon alt fa-home"></span>
+					<h3>Address</h3>
+					<span>
+					
+					
+					    Chicago,
+					
+					
+					    IL 
+					
+					
+					
+					    United States of America
+					
+					</span>
+				</div>
+			</section>
+		</section>
+	</div>
+</section>
+-->
+<!-- Footer -->
+	<footer id="footer">
+		<div class="inner">
+			<ul class="icons">
+    <li><a href="mailto:nicolasgmorales@u.northwestern.edu" class="icon alt fa-envelope"></a></li>
+    <li><a href="tel:(937) 776-0843" class="icon alt fa-phone"></a></li>
+    
+        
+            <li>
+                <a href="https://www.linkedin.com/in/nicolasgmorales/" class="icon alt fa-linkedin" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
+                    <span class="label">LinkedIn</span>
+                </a>
+            </li>
+        
+    
+        
+            <li>
+                <a href="https://github.com/ngmor" class="icon alt fa-github" target="_blank" rel="noopener noreferrer" aria-label="GitHub">
+                    <span class="label">GitHub</span>
+                </a>
+            </li>
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+</ul>
+			<!--
+			<ul class="icons">
+				<li><a href="mailto:nicolasgmorales@u.northwestern.edu" class="icon alt fa-envelope"></a></li>
+				<li><a href="tel:(937) 776-0843" class="icon alt fa-phone"></a></li>
+				
+					
+						<li>
+							<a href="https://www.linkedin.com/in/nicolasgmorales/" class="icon alt fa-linkedin" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
+								<span class="label">LinkedIn</span>
+							</a>
+						</li>
+					
+				
+					
+						<li>
+							<a href="https://github.com/ngmor" class="icon alt fa-github" target="_blank" rel="noopener noreferrer" aria-label="GitHub">
+								<span class="label">GitHub</span>
+							</a>
+						</li>
+					
+				
+					
+				
+					
+				
+					
+				
+					
+				
+					
+				
+					
+				
+			</ul>
+			-->
+			<ul class="copyright">
+				<li>&copy; <script>document.write(new Date().getFullYear())</script> Nicolas G. Morales </li>
+				<li>Design: <a href="https://html5up.net" target="_blank">HTML5 UP</a></li>
+				<li>Jekyll integration: <a href="http://andrewbanchi.ch" target="_blank">Andrew Banchich</a></li>
+
+			</ul>
+		</div>
+	</footer>
+
+</div>
+
+<!-- Scripts -->
+	<script src="https://ngmor.github.io/assets/js/jquery.min.js"></script>
+	<script src="https://ngmor.github.io/assets/js/jquery.scrolly.min.js"></script>
+	<script src="https://ngmor.github.io/assets/js/jquery.scrollex.min.js"></script>
+	<script src="https://ngmor.github.io/assets/js/skel.min.js"></script>
+	<script src="https://ngmor.github.io/assets/js/util.js"></script>
+	<!--[if lte IE 8]><script src="https://ngmor.github.io/assets/js/ie/respond.min.js"></script><![endif]-->
+	<script src="https://ngmor.github.io/assets/js/main.js"></script>
+	<!-- <script src="/js/zepto.min.js"></script>
+	<script>jQuery = Zepto;</script> -->
+	<script src="https://ngmor.github.io/assets/js/jquery.details.min.js"></script>
+	<script>$('details').details();</script>
+
+</body>
+
+</html>

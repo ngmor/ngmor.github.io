@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<!--
+	Forty by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+
+<head>
+	<title>Legged Autonomous Inspection | Nicolas G. Morales</title>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+	<!--[if lte IE 8]><script src="/assets/js/ie/html5shiv.js"></script><![endif]-->
+	<link rel="stylesheet" href="/assets/css/main.css" />
+	<!--[if lte IE 9]><link rel="stylesheet" href="/assets/css/ie9.css" /><![endif]-->
+	<!--[if lte IE 8]><link rel="stylesheet" href="/assets/css/ie8.css" /><![endif]-->
+</head>
+
+
+<body>
+
+    <!-- Wrapper -->
+<div id="wrapper">
+
+<!-- Header -->
+<header id="header">
+	
+		<a href="https://ngmor.github.io/" class="logo"><strong>Portfolio</strong> <span>Nicolas G. Morales</span></a>
+	
+	
+	<nav>
+		<a href="#menu">Menu</a>
+	</nav>
+</header>
+
+<!-- Menu -->
+<nav id="menu">
+	<ul class="links">
+        
+		    
+		
+		    
+		
+		    
+		
+		    
+				
+					<li><a href="https://ngmor.github.io/">Home</a></li>
+				
+	    	
+		
+		    
+		
+		    
+		
+		    
+		
+		
+		    
+		
+		    
+		        <li><a href="https://ngmor.github.io/about.html">About Me</a></li>
+		    
+		
+		    
+		        <li><a href="https://ngmor.github.io/contact.html">Contact</a></li>
+		    
+		
+		    
+		
+		    
+		        <li><a href="https://ngmor.github.io/projects.html">Projects</a></li>
+		    
+		
+		    
+		        <li><a href="https://ngmor.github.io/resume.html">Resume</a></li>
+		    
+		
+	</ul>
+	<!--
+	<ul class="actions vertical">
+		<li><a href="#" class="button special fit">Get Started</a></li>
+		<li><a href="#" class="button fit">Log In</a></li>
+	</ul>
+	-->
+</nav>
+ 
+    
+    
+<!-- Main -->
+<div id="main" class="alt">
+
+<!-- One -->
+<section id="one">
+	<div class="inner">
+		<header class="major">
+			<h1>Legged Autonomous Inspection</h1>
+		</header>
+		<div><strong>Technologies:</strong> C++, ROS 2, Nav2, Machine Learning, Unitree Go1</div><br>
+		
+			
+		
+		<p><a href="https://github.com/ngmor/unitree_inspection">GitHub Repository</a></p>
+
+<p>Since they can traverse environments designed for humans better than their wheeled counterparts, legged robots are well suited to keeping tabs on an industrial environment. This can especially come in handy for environments that are inconvenient or hazardous for humans to visit.</p>
+
+<p>I was interested in this autonomous inspection application, so my winter project in Northwestern University’s MSR program focused on exploring this with the quadruped <a href="https://www.trossenrobotics.com/unitree-overview"><strong>Unitree Go1</strong></a>.</p>
+
+<div style="width: 75%; margin: 0 auto;">
+    <div class="video-wrapper">
+        <iframe src="https://www.youtube.com/embed/onxPLXfmMvo" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen=""></iframe>
+    </div>
+</div>
+
+<p><br /></p>
+
+<details><summary><strong><u>Table of Contents</u></strong></summary>
+<ul>
+  <li><a href="#the-application">The Application</a></li>
+  <li><a href="#the-system">The System</a>
+    <ul>
+      <li><a href="#navigation">Navigation</a></li>
+      <li><a href="#optical-character-recognition">Optical Character Recognition</a></li>
+    </ul>
+  </li>
+  <li><a href="#future-work">Future Work</a></li>
+</ul>
+</details>
+
+<hr />
+
+<h2 id="the-application">The Application</h2>
+
+<p>Legged robots can be provided with a map of their industrial setting with specific points of interest. Once the robot has reached each point of interest, it can use an array of sensors - visual, thermal, and more - to collect data and decide if that data requires further investigation.</p>
+
+<p style="text-align: center;"><img src="/assets/images/legged-autonomous-inspection/full-application-flowchart.svg" alt="Industrial Inspection Flowchart" width="60%" /></p>
+<p style="text-align: center;"><em>A high level flow chart for how a legged robot could perform industrial inspections.</em></p>
+
+<p>I was particularly interested in exploring the navigation and sensing aspect of this application. I wanted to create a robot that could sense some information, make a decision as to where to navigate next based on that information, and then autonomously navigate there.</p>
+
+<p>I chose to present the data as text located somewhere at the inspection point, which the Go1 could read with its cameras and use to decide its next destination.</p>
+
+<p>A real-world analogy to this capability would be visually reading data from display readouts throughout an industrial environment. Many display readouts, especially in older facilities, provide sensor data that cannot be networked to a plant SCADA system. Having the ability to detect text and extract data from those sensor readouts would be very versatile.</p>
+
+<p style="text-align: center;"><img src="/assets/images/legged-autonomous-inspection/demo-flowchart.svg" alt="This Project's Flowchart" width="35%" /></p>
+<p style="text-align: center;"><em>A high level flowchart for my legged autonomous inspection demo.</em></p>
+
+<hr />
+
+<h2 id="the-system">The System</h2>
+<p>Accomplishing this autonomous inspection task required several subsystems integrated together. These subsystems generally fell into two categories:</p>
+<ul>
+  <li><strong>Navigation</strong> (3D LiDAR, RTAB-Map, Nav2)</li>
+  <li><strong>Optical Character Recognition</strong> (Onboard Cameras, EAST Text Detection, CRNN Text Recognition)</li>
+</ul>
+
+<p>with some control and high level logic packages to tie the subsystems together.</p>
+
+<p style="text-align: center;"><img src="/assets/images/legged-autonomous-inspection/system-diagram.svg" alt="Block Diagram of the System Software Stack" width="60%" style="padding-right: 10%;" /></p>
+<p style="text-align: center;"><em>A block diagram of the system software stack.</em></p>
+
+<hr />
+
+<h3 id="navigation">Navigation</h3>
+<p>A critical task for this project is autonomous navigation around a mapped environment and avoiding obstacles that may not have been present in the original map. Luckily ROS 2 has <a href="https://navigation.ros.org/"><strong>Nav2</strong></a>, a software stack designed specifically for this task. This integrated with a <strong>3D LiDAR</strong> and custom C++ control packages to allow the Go1 to navigate through its environment autonomously.</p>
+
+<p>Here’s a video of the Nav2 stack working with the Unitree Go1 for autonomous navigation. The point cloud created by the 3D LiDAR is displayed in the top left and the created map in the bottom right.</p>
+
+<div style="width: 50%; margin: 0 auto;">
+    <div class="video-wrapper">
+        <iframe src="https://www.youtube.com/embed/oz92rP-ztPk" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen=""></iframe>
+    </div>
+</div>
+
+<p><br /></p>
+
+<details><summary><strong><u>Expand</u></strong> for more technical details on the navigation subsystem.</summary>
+<p>The first part of integrating Nav2 with the Unitree Go1 was sensing. The Unitree Go1 EDU Plus model has an option of coming with a <a href="https://www.robosense.ai/en/rslidar/RS-Helios"><strong>RoboSense RS-Helios-16P 3D LiDAR</strong></a>, so I worked with <a href="https://marnonel6.github.io/">Marno Nel</a> to set up this sensor for mapping of the environment. We chose to process the point cloud data provided by this sensor with <a href="http://introlab.github.io/rtabmap/"><strong>RTAB-Map</strong></a> for its 3D 6DoF mapping capabilities. RTAB-Map provides the Nav2 stack with <a href="https://en.wikipedia.org/wiki/Iterative_closest_point"><strong>ICP odometry</strong></a> and SLAM updates for the position of the robot and objects in the environment. Nav2 then uses this information to create local and global costmaps for planning paths that avoid collisions with obstacles in the environment.</p>
+
+<p>The second part of integrating Nav2 with the Unitree Go1 was control. Nav2 can already plan paths and command velocities, but it needs some way to pass these commands through to the robot. I wrote a <code class="language-plaintext highlighter-rouge">cmd_processor</code> ROS 2 C++ node in the <a href="https://github.com/ngmor/unitree_nav"><code class="language-plaintext highlighter-rouge">unitree_nav</code></a> repository that takes in commanded velocities and translates them to control messages that can be interpreted by my communication node in the <a href="https://github.com/katie-hughes/unitree_ros2"><code class="language-plaintext highlighter-rouge">unitree_ros2</code></a> repository and sent to the Go1 over UDP. This node also handles other control capabilities, like commanding the Go1 to stand up and lay down. The other half of control was commanding Nav2 to plan and execute paths, which I wrote example code for in the <code class="language-plaintext highlighter-rouge">nav_to_pose</code> node of the <code class="language-plaintext highlighter-rouge">unitree_nav</code> repository.</p>
+
+</details>
+
+<hr />
+
+<h3 id="optical-character-recognition">Optical Character Recognition</h3>
+<p>The second required subsystem is visual text detection and recognition, referred to here as <strong>Optical Character Recognition (OCR)</strong>. This project uses the Go1’s onboard stereo cameras and two pre-trained machine learning models to accomplish this task. I wrote a <a href="https://github.com/ngmor/unitree_camera">ROS 2 C++ wrapper</a> for the <a href="https://github.com/ngmor/UnitreecameraSDK"><strong>Unitree Camera SDK</strong></a> to publish camera data. This data then feeds into an <a href="https://arxiv.org/abs/1704.03155v2"><strong>EAST Text Detection</strong></a> model to locate text in the images. Finally, a <strong>convolutional recurrent neural network (CRNN)</strong> is used to recognize and interpret the text data.</p>
+
+<p style="text-align: center;"><img src="/assets/images/legged-autonomous-inspection/camera-feeds.gif" alt="Stereo Rectified, Depth, and Point Cloud" width="50%" /></p>
+<p style="text-align: center;"><em>Go1 head front camera feeds of stereo rectified and depth images and point cloud data.</em></p>
+
+<p style="text-align: center;"><img src="/assets/images/legged-autonomous-inspection/woof-bark-arf-ruff.jpg" alt="Woof! Bark! Arf! Ruff!" width="35%" /></p>
+<p style="text-align: center;"><em>Making the dog read dog words.</em></p>
+
+<details><summary><strong><u>Expand</u></strong> for more technical details on the visual text detection subsystem.</summary>
+<p>My Unitree Camera SDK C++ wrapper uses <a href="https://github.com/ros-perception/image_common/tree/ros2/image_transport"><code class="language-plaintext highlighter-rouge">image_transport</code></a> for image compression. This publishes raw, rectified, depth, and point cloud images from any of the Go1’s five onboard cameras.</p>
+
+<p>The first machine learning model uses a neural network based on a <a href="https://github.com/argman/EAST">TensorFlow re-implementation</a> of the <a href="https://arxiv.org/abs/1704.03155v2"><strong>Efficient and Accurate Scene Text Detector (EAST)</strong></a> model. This pipeline is designed to detect where text is located in a natural scene so that a text recognition model can parse it into characters. The EAST model provides bounding vertices for lines of text in arbitrary orientations, as shown by the green bounding rectangles in the image above.</p>
+
+<p>The second machine learning model uses a <strong>convolutional recurrent neural network (CRNN)</strong> trained on the <a href="https://www.robots.ox.ac.uk/~vgg/data/text/">MJSynth</a> and <a href="https://www.robots.ox.ac.uk/~vgg/data/scenetext/">SynthText</a> datasets. It accepts the bounding vertices from the EAST model and parses the image cropped at those vertices into actual text, shown in red above.</p>
+
+</details>
+
+<p><br /></p>
+
+<p>Finally, I wrote a simple pitch sweeping sequence that commands the Go1 to sweep its head front camera up and down continuously until it reliabily detects a text command. Below is a demonstration of this behavior.</p>
+
+<div style="width: 50%; margin: 0 auto;">
+    <div class="video-wrapper">
+        <iframe src="https://www.youtube.com/embed/zDpLrAneXNg" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen=""></iframe>
+    </div>
+</div>
+
+<p><br /></p>
+
+<hr />
+
+<h2 id="future-work">Future Work</h2>
+<p>Putting the navigation and OCR subsystems together creates a system that can pretty reliably navigate between inspection points in an arbitrary order and avoid obstacles along the way. But as with any project, there is always improvements that can be made.</p>
+
+<details><summary><strong>1. Letting the dog off the leash.</strong></summary>
+<p>As can be seen in the demo video, an Ethernet cable connects my laptop to the Go1’s network of internal computers. This is partially so I can run visualization of the map and point cloud data in RVIZ, but it’s also because our Go1’s onboard computers are not yet capable of running all the required nodes for this project.</p>
+
+<p>One of the most challenging parts of this project was upgrading the Go1’s onboard NVIDIA Jetson Nanos to Ubuntu 22.04. The Nanos come with Ubuntu 18.04 - two LTS’s behind the only Tier 1 supported Linux OS for ROS 2 Humble (Ubuntu 22.04). <a href="https://katie-hughes.github.io/">Katie Hughes</a> and I worked together with help from this <a href="https://qengineering.eu/install-ubuntu-20.04-on-jetson-nano.html">awesome blog from Q-engineering</a> to upgrade the Go1 to what we believe to be the only ROS 2 Humble version out there (at the time of writing this post).</p>
+
+<p>Unfortunately, we did not have time to also upgrade the Jetson Xavier NX on the Go1, which has more computing power. Getting the Xavier on 22.04 would allow us to run point cloud processing nodes at reasonable speeds on the robot. We also currently have some limited wireless control of the Go1, which could be improved by bridging the onboard network through the Go1 Raspberry Pi’s WiFi adapter. These two improvements would allow us to let the dog off the leash and create a truly mobile autonomous inspection bot.</p>
+
+</details>
+
+<details><summary><strong>2. Integrating IMU odometry.</strong></summary>
+<p>The Go1 provides some odometry calculated from data from its onboard IMU, with limited accuracy. <a href="https://marnonel6.github.io/">Marno Nel</a> and I experimented with integrating this with the Nav2 stack for faster odometry updates, but we weren’t able to get it working in time to compare with the ICP odometry. Onboard IMU odometry may help improve localization by providing faster odometry updates in between the LiDAR-based SLAM updates. Our progress can be found in the <a href="https://github.com/ngmor/unitree_nav/tree/onboard-odometry"><code class="language-plaintext highlighter-rouge">onboard-odometry</code></a> branch of the <code class="language-plaintext highlighter-rouge">unitree_nav</code> repo.</p>
+
+</details>
+
+<details><summary><strong>3. Improving holonomic capabilities.</strong></summary>
+<p>The Go1 can move forward, backward, and to each side. At current, Nav2 only ever plans paths where the robot moves in the forward and backward directions and rotates. With a little more investigation, this could be improved so the robot can move side to side too when planning paths!</p>
+
+</details>
+
+<details><summary><strong>4. Improving data search capabilities.</strong></summary>
+<p>Currently, when searching for data, the Go1 only sweeps up and down from its current position. If there was some error in the navigation, this can sometimes cause it to miss the data at the inspection point. Improved algorithms to move the Go1 around the inspection point might help find the data more reliably.</p>
+
+</details>
+
+<details><summary><strong>5. Adding other sensors.</strong></summary>
+<p>Visual inspection is great and could be extended to further cases. But it would also be versatile to include other sensors such as IR cameras to improve the dog’s sensing capabilities.</p>
+
+</details>
+
+<hr />
+
+<p>A big thanks to the other engineers who collaborated with me in getting the Go1 up and running. The autonomous inspection project was my own, but <a href="https://marnonel6.github.io/"><strong>Marno Nel</strong></a>, <a href="https://katie-hughes.github.io/"><strong>Katie Hughes</strong></a>, <a href="https://avazahedi.github.io/"><strong>Ava Zahedi</strong></a>, and I worked together on upgrading and integrating the Go1 with ROS 2 Humble.</p>
+
+	</div>
+</section>
+
+</div>
+
+    <!-- Contact -->
+<!--
+<section id="contact">
+	<div class="inner">
+		<section>
+			<form action="https://formspree.io/nicolasgmorales@u.northwestern.edu" method="POST">
+				<div class="field half first">
+					<label for="name">Name</label>
+					<input type="text" name="name" id="name" />
+				</div>
+				<div class="field half">
+					<label for="email">Email</label>
+					<input type="text" name="_replyto" id="email" />
+				</div>
+				<div class="field">
+					<label for="message">Message</label>
+					<textarea name="message" id="message" rows="6"></textarea>
+				</div>
+				<ul class="actions">
+					<li><input type="submit" value="Send Message" class="special" /></li>
+					<li><input type="reset" value="Clear" /></li>
+				</ul>
+			</form>
+		</section>
+		<section class="split">
+			<section>
+				<div class="contact-method">
+					<span class="icon alt fa-envelope"></span>
+					<h3>Email</h3>
+					<a href="mailto:nicolasgmorales@u.northwestern.edu">nicolasgmorales@u.northwestern.edu</a>
+				</div>
+			</section>
+			<section>
+				<div class="contact-method">
+					<span class="icon alt fa-phone"></span>
+					<h3>Phone</h3>
+					<a href="tel:(937) 776-0843">(937) 776-0843</a>
+				</div>
+			</section>
+			<section>
+				<div class="contact-method">
+					<span class="icon alt fa-home"></span>
+					<h3>Address</h3>
+					<span>
+					
+					
+					    Chicago,
+					
+					
+					    IL 
+					
+					
+					
+					    United States of America
+					
+					</span>
+				</div>
+			</section>
+		</section>
+	</div>
+</section>
+-->
+<!-- Footer -->
+	<footer id="footer">
+		<div class="inner">
+			<ul class="icons">
+    <li><a href="mailto:nicolasgmorales@u.northwestern.edu" class="icon alt fa-envelope"></a></li>
+    <li><a href="tel:(937) 776-0843" class="icon alt fa-phone"></a></li>
+    
+        
+            <li>
+                <a href="https://www.linkedin.com/in/nicolasgmorales/" class="icon alt fa-linkedin" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
+                    <span class="label">LinkedIn</span>
+                </a>
+            </li>
+        
+    
+        
+            <li>
+                <a href="https://github.com/ngmor" class="icon alt fa-github" target="_blank" rel="noopener noreferrer" aria-label="GitHub">
+                    <span class="label">GitHub</span>
+                </a>
+            </li>
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+</ul>
+			<!--
+			<ul class="icons">
+				<li><a href="mailto:nicolasgmorales@u.northwestern.edu" class="icon alt fa-envelope"></a></li>
+				<li><a href="tel:(937) 776-0843" class="icon alt fa-phone"></a></li>
+				
+					
+						<li>
+							<a href="https://www.linkedin.com/in/nicolasgmorales/" class="icon alt fa-linkedin" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
+								<span class="label">LinkedIn</span>
+							</a>
+						</li>
+					
+				
+					
+						<li>
+							<a href="https://github.com/ngmor" class="icon alt fa-github" target="_blank" rel="noopener noreferrer" aria-label="GitHub">
+								<span class="label">GitHub</span>
+							</a>
+						</li>
+					
+				
+					
+				
+					
+				
+					
+				
+					
+				
+					
+				
+					
+				
+			</ul>
+			-->
+			<ul class="copyright">
+				<li>&copy; <script>document.write(new Date().getFullYear())</script> Nicolas G. Morales </li>
+				<li>Design: <a href="https://html5up.net" target="_blank">HTML5 UP</a></li>
+				<li>Jekyll integration: <a href="http://andrewbanchi.ch" target="_blank">Andrew Banchich</a></li>
+
+			</ul>
+		</div>
+	</footer>
+
+</div>
+
+<!-- Scripts -->
+	<script src="https://ngmor.github.io/assets/js/jquery.min.js"></script>
+	<script src="https://ngmor.github.io/assets/js/jquery.scrolly.min.js"></script>
+	<script src="https://ngmor.github.io/assets/js/jquery.scrollex.min.js"></script>
+	<script src="https://ngmor.github.io/assets/js/skel.min.js"></script>
+	<script src="https://ngmor.github.io/assets/js/util.js"></script>
+	<!--[if lte IE 8]><script src="https://ngmor.github.io/assets/js/ie/respond.min.js"></script><![endif]-->
+	<script src="https://ngmor.github.io/assets/js/main.js"></script>
+	<!-- <script src="/js/zepto.min.js"></script>
+	<script>jQuery = Zepto;</script> -->
+	<script src="https://ngmor.github.io/assets/js/jquery.details.min.js"></script>
+	<script>$('details').details();</script>
+
+</body>
+
+</html>

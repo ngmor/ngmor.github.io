@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<!--
+	Forty by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+
+<head>
+	<title>SimpleStrings | Nicolas G. Morales</title>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+	<!--[if lte IE 8]><script src="/assets/js/ie/html5shiv.js"></script><![endif]-->
+	<link rel="stylesheet" href="/assets/css/main.css" />
+	<!--[if lte IE 9]><link rel="stylesheet" href="/assets/css/ie9.css" /><![endif]-->
+	<!--[if lte IE 8]><link rel="stylesheet" href="/assets/css/ie8.css" /><![endif]-->
+</head>
+
+
+<body>
+
+    <!-- Wrapper -->
+<div id="wrapper">
+
+<!-- Header -->
+<header id="header">
+	
+		<a href="https://ngmor.github.io/" class="logo"><strong>Portfolio</strong> <span>Nicolas G. Morales</span></a>
+	
+	
+	<nav>
+		<a href="#menu">Menu</a>
+	</nav>
+</header>
+
+<!-- Menu -->
+<nav id="menu">
+	<ul class="links">
+        
+		    
+		
+		    
+		
+		    
+		
+		    
+				
+					<li><a href="https://ngmor.github.io/">Home</a></li>
+				
+	    	
+		
+		    
+		
+		    
+		
+		    
+		
+		
+		    
+		
+		    
+		        <li><a href="https://ngmor.github.io/about.html">About Me</a></li>
+		    
+		
+		    
+		        <li><a href="https://ngmor.github.io/contact.html">Contact</a></li>
+		    
+		
+		    
+		
+		    
+		        <li><a href="https://ngmor.github.io/projects.html">Projects</a></li>
+		    
+		
+		    
+		        <li><a href="https://ngmor.github.io/resume.html">Resume</a></li>
+		    
+		
+	</ul>
+	<!--
+	<ul class="actions vertical">
+		<li><a href="#" class="button special fit">Get Started</a></li>
+		<li><a href="#" class="button fit">Log In</a></li>
+	</ul>
+	-->
+</nav>
+ 
+    
+    
+<!-- Main -->
+<div id="main" class="alt">
+
+<!-- One -->
+<section id="one">
+	<div class="inner">
+		<header class="major">
+			<h1>SimpleStrings</h1>
+		</header>
+		<div><strong>Technologies:</strong> Arduino, KiCAD PCB Design</div><br>
+		
+			
+		
+		<p>Mechanical engineering students at Purdue University participate in a semester long capstone project in teams of six. The goal of the project is to propose, design, and produce a prototype of a product to solve a problem of the team’s choice. My team decided to combine our experience with mechanical, electrical, and software engineering with our passion for music to create <strong>SimpleStrings</strong>, an assistive guitar playing device.</p>
+
+<p>SimpleStrings was designed as a tool for music therapy. <a href="https://www.musictherapy.org/about/musictherapy/"><strong>Music Therapy</strong></a> is the practice of using music in a therapeutic relationship to address physical, emotional, cognitive, and social needs of individuals. It can be used to help individuals in many situations, including <strong>brain injuries</strong>, <strong>dementia</strong>, <strong>dyslexia</strong>, <strong>autism</strong>, <strong>mental illnesses</strong>, and more.</p>
+
+<div style="width: 75%; margin: 0 auto;">
+    <div class="video-wrapper">
+        <iframe src="https://www.youtube.com/embed/94spG3D15ZU" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen=""></iframe>
+    </div>
+</div>
+
+<p><br /></p>
+
+<details><summary><strong><u>Table of Contents</u></strong></summary>
+<ul>
+  <li><a href="#problem-definition">Problem Definition</a></li>
+  <li><a href="#design">Design</a>
+    <ul>
+      <li><a href="#characteristicsfunctionality">Characteristics/Functionality</a></li>
+      <li><a href="#electrical-subsystem">Electrical Subsystem</a></li>
+    </ul>
+  </li>
+  <li><a href="#future-work">Future Work</a></li>
+  <li><a href="#conclusions">Conclusions</a></li>
+  <li><a href="#team-organization">Team Organization</a></li>
+</ul>
+</details>
+
+<hr />
+
+<h2 id="problem-definition">Problem Definition</h2>
+<p><strong>Guitar can be a challenging instrument to use in music therapy situations</strong>. It involves complex hand configurations and memorization to produce chords. In situations where therapy is the end goal (not learning to play the instrument itself), this learning curve can cause frustration on the part of the player. During our initial research phase, my teams spoke to 9 music therapy professionals and 2 special educators. We learned from them that some of their patients love the guitar, and a method of facilitating access to the instrument would improve their music therapy experience and outcomes.</p>
+
+<p>With that in mind, we set out to design a device that would <strong>make it easier for individuals with varying physical and/or mental abilities to play the guitar</strong>.</p>
+
+<hr />
+
+<h2 id="design">Design</h2>
+<p>The SimpleStrings device is designed to attach directly to the neck of a guitar (this prototype was built for a Fender Squier Stratocaster). Its working area covers <strong>4 frets at a time</strong>, but the device can be repositioned in between songs to <strong>5 different positions</strong> along the guitar neck. This means that, if used with a standard guitar capo, SimpleStrings can be used to play music in any desired key.</p>
+
+<p style="text-align: center;"><img src="/assets/images/simplestrings/simplestrings-with-capo.png" alt="SimpleStrings attached to the guitar neck with a capo" width="40%" style="padding-right: 5%;" />
+<img src="/assets/images/simplestrings/fret-range.png" alt="The fret range of the SimpleStrings device" width="40%" style="padding-bottom: 7.5%;" /></p>
+
+<p>When one of the colored buttons along the bottom of the device is pressed, 24 small gear motors inside the device are actuated to press down on the guitar strings in specific configurations, forming chords. The buttons do not need to be held down and there is no need to memorize/master complex hand positions, greatly facilitating the mechanical aspects of playing the guitar.</p>
+
+<p style="text-align: center;"><img src="/assets/images/simplestrings/undercarriage.png" alt="The underside of SimpleStrings" width="40%" style="padding-right: 5%;" />
+<img src="/assets/images/simplestrings/micro-gearmotor.png" alt="The fret range of the SimpleStrings device" width="40%" /></p>
+
+<p>5 colored buttons allow for 5 main chords to be stored at a time, and 2 “modifier” buttons can modify each of those chords for a little extra flair (ex: Am -&gt; Am7 or D -&gt; Dsus4). This allows the device to store up to <strong>15 programmable chords at a time</strong>. These chords are completely customizable through our custom chord programming application, which allows users to <strong>select from 142 default chords or define any completely custom chord</strong> in the 4 fret range. The currently programmed chords appear on the OLED screens on the top of the device.</p>
+
+<p style="text-align: center;"><img src="/assets/images/simplestrings/chord-programming.png" alt="Custom interface used for selecting the device's stored chords" width="40%" style="padding-right: 5%;" />
+<img src="/assets/images/simplestrings/oled-screens.png" alt="OLED screens display the currently programmed chords and their modifiers" width="25%" /></p>
+
+<hr />
+
+<h3 id="characteristicsfunctionality">Characteristics/Functionality</h3>
+
+<p style="text-align: center;"><img src="/assets/images/simplestrings/playing-simplestrings-1.png" alt="Playing SimpleStrings" width="60%" /></p>
+
+<table>
+  <tbody>
+    <tr>
+      <td><strong>Battery Life</strong></td>
+      <td>~3.5 hours of play time per battery</td>
+    </tr>
+    <tr>
+      <td><strong>Button Press Force</strong></td>
+      <td>11% of normal string depression force</td>
+    </tr>
+    <tr>
+      <td><strong>Device Attachment Time</strong></td>
+      <td>~47 seconds</td>
+    </tr>
+    <tr>
+      <td><strong>Chord Change Time</strong></td>
+      <td>0.42 seconds</td>
+    </tr>
+    <tr>
+      <td><strong>Dimensions</strong></td>
+      <td>18.75 cm x 16.25 cm x 11.5 cm</td>
+    </tr>
+    <tr>
+      <td><strong>Weight</strong></td>
+      <td>1.185 kg (user support is not necessary to keep the guitar from tipping with SimpleStrings attached)</td>
+    </tr>
+  </tbody>
+</table>
+
+<p style="text-align: center;"><img src="/assets/images/simplestrings/dimensions-and-weight.png" alt="Physical characteristics of SimpleStrings" width="75%" /></p>
+
+<hr />
+
+<h3 id="electrical-subsystem">Electrical Subsystem</h3>
+<p>Although I was involved in almost all aspects of this project, my primary responsibility was to design and manufacture the electrical subsystems. This involved designing an architecture to control/power all the components of the system, selecting those components, designing a PCB to mount/connect necessary components, and assembling/testing the system. An added mechanical challenge was conforming to the form factor of the guitar neck for the final prototype.</p>
+
+<p>One of the main challenges was the amount of IO that we needed to control. 5 OLED screens controlled via I2C, 7 digital buttons, and a grid of 24 motors is a lot of IO points to consider. Our solution was to use the Arduino Mega 2560 Pro - a smaller form factor version of the Arduino MEGA 2560 - for its extra IO capacity and shift registers to send commands to motor control boards.</p>
+
+<details><summary><strong><u>Expand</u></strong> for more technical details on the IO handling.</summary>
+<p>Even with the higher capacity Mega 2560 Pro board there was not enough IO to independently control each of the 24 motors with a PWM signal. Part of the solution for this was to use separate motor control boards, which allowed us to use simple digital signals to send commands to the motors. Still, multiple digital signals to each of the 24 motors meant quite a bit of digital output pins to use. Instead, our solution was to use an array of shift registers to which we fed motor commands serially. Since we always needed to send commands to all motors at the same time (during a chord change), we could simply load our commands into the shift registers and then trigger movements simultaneously.</p>
+
+</details>
+
+<p style="text-align: center;"><img src="/assets/images/simplestrings/arduino-mega-2560-pro.png" alt="Arduino MEGA 2560 Pro" width="30%" /></p>
+
+<p>We also used 5 small OLED displays, roughly lined up with the buttons below to encourage a spatial relationship between the buttons and the data on the screens.</p>
+
+<details><summary><strong><u>Expand</u></strong> for more technical details on the OLED displays.</summary>
+<p>These particular OLED displays communicated over I2C, but only had 2 options for I2C addresses. In order to control each display individually, we had to make use of an I2C multiplexer. This allowed us to toggle between the screens to send updated data as necessary.</p>
+
+</details>
+
+<p><br /></p>
+
+<p style="text-align: center;"><img src="/assets/images/simplestrings/oled-closeup.png" alt="Chords displayed on the OLED screens" width="60%" /></p>
+
+<p>Finally, we decided to create custom PCBs to hold our components for several reasons. First, even though this design was intended as a prototype, we didn’t feel that a breadboard setup would be reliable, given the number of connections between components that was necessary. Secondly, a breadboard setup would have been much more bulky than a PCB setup, which would have made it difficult to mount to the guitar neck.</p>
+
+<p>However, with designing a PCB comes the inherent risk that if directly soldered components were to break, they would be more difficult to replace. In an accelerated project time frame like this, this was an important consideration. So we decided to pursue a compromise - design a custom PCB to reduce the complexity and increase the reliability of component connections, but make heavy use of header sockets and pins so we could quickly remove and replace components if necessary.</p>
+
+<p style="text-align: center;"><img src="/assets/images/simplestrings/board-i.png" alt="Custom PCB 1" width="40%" style="padding-bottom: 0.5%; padding-right: 1.25%" />
+<img src="/assets/images/simplestrings/board-ii.png" alt="Custom PCB 2" width="40%" style="padding-left: 1.25%" /></p>
+
+<p>I designed and laid out the boards using <a href="https://www.kicad.org/"><strong>KiCad</strong></a>. To fit all the removable components into the form factor of the guitar neck, I had to place the components into two separate boards that were stacked on top of eachother and connected via a 50 pin surface mount connector.</p>
+
+<p>After completing the design, ordering, and receiving the boards, I soldered all the components together to create a finished product for the prototype.</p>
+
+<p style="text-align: center;"><img src="/assets/images/simplestrings/assembled-electronics.jpg" alt="Assembled PCBs with components" width="60%" /></p>
+
+<p>Prior to the design of the PCB, we had completed successful breadboard tests for all the components. But our big moment of truth was making sure that all the components integrated together would still function properly. Thankfully, after the detailed design review our team did on the boards, all the components worked perfectly, and our project’s electrical subsystem was complete!</p>
+
+<hr />
+
+<h2 id="future-work">Future Work</h2>
+<p>Our design was only ever intended to be a first prototype of the SimpleStrings system, and there certainly were areas for improvement we would like to tackle if we pursued a next iteration. Some of our own desired improvements, as well as those we collected from the music therapists we talked to, are listed below.</p>
+
+<details><summary><strong>1. The height of the device is very cumbersome.</strong></summary>
+<p>This is perhaps the most significant improvement we could make for the product. It’s large, which makes it more difficult to transport, attach, see the buttons, etc.</p>
+
+<p>A lot of the height of the product is directly related to limitations of the prototype process. For example, our choice to use PCB components mounted in header sockets greatly increased the vertical height of our PCB design. This was a tradeoff for flexibility in prototyping that, if we were designing a next generation or final product design, I would certainly want to consolidate to remove vertical bulk. If replaced by surface mount components, we could reduce the PCB height by 85%.</p>
+
+<p>Similarly, if we could order our motors in bulk, we could specify a gear ratio built into our motors, rather than having an external gearbox. This would decrease the height of our motor assembly. These two reductions alone would reduce the total height of the device by 29%.</p>
+
+<p>We could also explore other options for more efficient packaging of the components in our system to further reduce the height.</p>
+
+<p style="text-align: center;"><img src="/assets/images/simplestrings/pcb-height-reduction.png" alt="Possible PCB height reduction" width="40%" style="padding-right: 1.25%" />
+<img src="/assets/images/simplestrings/motor-height-reduction.png" alt="Possible motor height reduction" width="35.5%" style="padding-left: 1.25%" /></p>
+
+<p style="text-align: center;"><img src="/assets/images/simplestrings/total-height-reduction.png" alt="Possible total height reduction" width="40%" /></p>
+
+</details>
+
+<details><summary><strong>2. The screens currently don’t indicate which chord is being played, which would be helpful for users.</strong></summary>
+<p>This functionality would be possible with the current hardware and a software update, but we could even explore different options for color OLED screens and improve the UI of the device in general.</p>
+
+</details>
+
+<details><summary><strong>3. The buttons are difficult for users to see while playing the device.</strong></summary>
+<p>Certainly reduction in height, as mentioned above, would help address this problem. We could also explore more ergonomic redesigns of the device form factor or improve the screen UI to reduce the relevance of looking directly at the buttons.</p>
+
+</details>
+
+<hr />
+
+<h2 id="conclusions">Conclusions</h2>
+<p>This capstone process was a great experience to go through the process of product design. SimpleStrings was incredibly fun to design and play with, and we hope it would be very helpful in music therapy contexts. We certainly have areas to improve, but no engineering project is finished on the first iteration!</p>
+
+<hr />
+
+<h2 id="team-organization">Team Organization</h2>
+<p>In order to complete the entire design process from conceptual design to prototype fabrication in just 5 months, our team assigned roles to allow us to focus our efforts more efficiently as a team. The team consisted of:</p>
+
+<table>
+  <tbody>
+    <tr>
+      <td><strong>Kristen Gallett</strong> - Project Manager</td>
+      <td><strong>Jared Borg</strong> - Chief Engineer</td>
+    </tr>
+    <tr>
+      <td><strong>Emily Jackson</strong> - Procurement, Safety Lead</td>
+      <td><strong>Jonathon Lemke</strong> - CAD Lead, Business Manager</td>
+    </tr>
+    <tr>
+      <td><strong>Lindsey May</strong> - Software Lead, Customer Eyes</td>
+      <td><strong>Nick Morales</strong> - Electronics Lead</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Finally, here’s an extended cut of the project video:</p>
+<div style="width: 75%; margin: 0 auto;">
+    <div class="video-wrapper">
+        <iframe src="https://www.youtube.com/embed/d3h6AYNHfU4" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen=""></iframe>
+    </div>
+</div>
+
+	</div>
+</section>
+
+</div>
+
+    <!-- Contact -->
+<!--
+<section id="contact">
+	<div class="inner">
+		<section>
+			<form action="https://formspree.io/nicolasgmorales@u.northwestern.edu" method="POST">
+				<div class="field half first">
+					<label for="name">Name</label>
+					<input type="text" name="name" id="name" />
+				</div>
+				<div class="field half">
+					<label for="email">Email</label>
+					<input type="text" name="_replyto" id="email" />
+				</div>
+				<div class="field">
+					<label for="message">Message</label>
+					<textarea name="message" id="message" rows="6"></textarea>
+				</div>
+				<ul class="actions">
+					<li><input type="submit" value="Send Message" class="special" /></li>
+					<li><input type="reset" value="Clear" /></li>
+				</ul>
+			</form>
+		</section>
+		<section class="split">
+			<section>
+				<div class="contact-method">
+					<span class="icon alt fa-envelope"></span>
+					<h3>Email</h3>
+					<a href="mailto:nicolasgmorales@u.northwestern.edu">nicolasgmorales@u.northwestern.edu</a>
+				</div>
+			</section>
+			<section>
+				<div class="contact-method">
+					<span class="icon alt fa-phone"></span>
+					<h3>Phone</h3>
+					<a href="tel:(937) 776-0843">(937) 776-0843</a>
+				</div>
+			</section>
+			<section>
+				<div class="contact-method">
+					<span class="icon alt fa-home"></span>
+					<h3>Address</h3>
+					<span>
+					
+					
+					    Chicago,
+					
+					
+					    IL 
+					
+					
+					
+					    United States of America
+					
+					</span>
+				</div>
+			</section>
+		</section>
+	</div>
+</section>
+-->
+<!-- Footer -->
+	<footer id="footer">
+		<div class="inner">
+			<ul class="icons">
+    <li><a href="mailto:nicolasgmorales@u.northwestern.edu" class="icon alt fa-envelope"></a></li>
+    <li><a href="tel:(937) 776-0843" class="icon alt fa-phone"></a></li>
+    
+        
+            <li>
+                <a href="https://www.linkedin.com/in/nicolasgmorales/" class="icon alt fa-linkedin" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
+                    <span class="label">LinkedIn</span>
+                </a>
+            </li>
+        
+    
+        
+            <li>
+                <a href="https://github.com/ngmor" class="icon alt fa-github" target="_blank" rel="noopener noreferrer" aria-label="GitHub">
+                    <span class="label">GitHub</span>
+                </a>
+            </li>
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+</ul>
+			<!--
+			<ul class="icons">
+				<li><a href="mailto:nicolasgmorales@u.northwestern.edu" class="icon alt fa-envelope"></a></li>
+				<li><a href="tel:(937) 776-0843" class="icon alt fa-phone"></a></li>
+				
+					
+						<li>
+							<a href="https://www.linkedin.com/in/nicolasgmorales/" class="icon alt fa-linkedin" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
+								<span class="label">LinkedIn</span>
+							</a>
+						</li>
+					
+				
+					
+						<li>
+							<a href="https://github.com/ngmor" class="icon alt fa-github" target="_blank" rel="noopener noreferrer" aria-label="GitHub">
+								<span class="label">GitHub</span>
+							</a>
+						</li>
+					
+				
+					
+				
+					
+				
+					
+				
+					
+				
+					
+				
+					
+				
+			</ul>
+			-->
+			<ul class="copyright">
+				<li>&copy; <script>document.write(new Date().getFullYear())</script> Nicolas G. Morales </li>
+				<li>Design: <a href="https://html5up.net" target="_blank">HTML5 UP</a></li>
+				<li>Jekyll integration: <a href="http://andrewbanchi.ch" target="_blank">Andrew Banchich</a></li>
+
+			</ul>
+		</div>
+	</footer>
+
+</div>
+
+<!-- Scripts -->
+	<script src="https://ngmor.github.io/assets/js/jquery.min.js"></script>
+	<script src="https://ngmor.github.io/assets/js/jquery.scrolly.min.js"></script>
+	<script src="https://ngmor.github.io/assets/js/jquery.scrollex.min.js"></script>
+	<script src="https://ngmor.github.io/assets/js/skel.min.js"></script>
+	<script src="https://ngmor.github.io/assets/js/util.js"></script>
+	<!--[if lte IE 8]><script src="https://ngmor.github.io/assets/js/ie/respond.min.js"></script><![endif]-->
+	<script src="https://ngmor.github.io/assets/js/main.js"></script>
+	<!-- <script src="/js/zepto.min.js"></script>
+	<script>jQuery = Zepto;</script> -->
+	<script src="https://ngmor.github.io/assets/js/jquery.details.min.js"></script>
+	<script>$('details').details();</script>
+
+</body>
+
+</html>
