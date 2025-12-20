@@ -4,7 +4,7 @@ title: IMUnipulator
 description: C, IMU, nRF52833
 image: assets/images/imunipulator/main.gif
 imagewidth: 0
-order: 993
+order: 992
 ---
 
 [GitHub Repository](https://github.com/hang-yin/IMUnipulator)
