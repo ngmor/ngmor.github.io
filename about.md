@@ -13,7 +13,7 @@ I graduated from Purdue University in 2019 with a B.S. in Mechanical Engineering
 
 My passion to continue working with cutting edge technologies in the software, electrical, and mechanical realms led me to pursue a Master’s in Robotics at Northwestern University. While at Northwestern, I worked with a myriad of robotic technologies, including robotic manipulation, SLAM, autonomous navigation, and machine learning. I graduated with my M.S. in Robotics in December 2023.
 
-I'm now developing flight software at Astrobotic to power lunar rovers and improve our access to the moon.
+Since graduating, I've been a part of the perception and autonomy team at Astrobotic. My work here has spanned several domains, including flight software for our lunar rovers and critical lunar lander sensors, ground software for rover localization and perception, and research and development work for developing new perception technologies.
 
 {:refdef: style="text-align: center;"}
 <div class="inner">
