@@ -25,7 +25,7 @@ _The CubeRover Mission 1 (CM1) mission patch and flight model (FM), which will f
 Image Credit: Astrobotic
 {: refdef}
 
-CubeRover's maiden voyage will be [**CubeRover Mission 1 (CM1)**](TODO/CubeRoverFlightReady) aboard Astrobotic's Griffin Mission 1 (GM1). The rover will be deployed to the lunar surface, where it will demonstrate several technologies key to the future development of the CubeRover line. This includes driving into shadowed regions to better understand the lunar thermal environment, performing mobility tests to understand lunar surface traversability for lightweight rovers, and testing a software-defined radio (SDR) which could be used to allow rovers that can survive the lunar night (where their lander counterparts might cease to operate) to communicate with orbital assets.
+CubeRover's maiden voyage will be [**CubeRover Mission 1 (CM1)**](https://www.astrobotic.com/astrobotics-cuberover-is-flight-ready-for-lunar-mission/) aboard Astrobotic's Griffin Mission 1 (GM1). The rover will be deployed to the lunar surface, where it will demonstrate several technologies key to the future development of the CubeRover line. This includes driving into shadowed regions to better understand the lunar thermal environment, performing mobility tests to understand lunar surface traversability for lightweight rovers, and testing a software-defined radio (SDR) which could be used to allow rovers that can survive the lunar night (where their lander counterparts might cease to operate) to communicate with orbital assets.
 
 In order to prepare CubeRover for the CM1 mission, I worked with software engineers at Astrobotic to define the architecture and design philosophy around CubeRover's flight software. Our philosophy allows for modular software re-use and shared development across missions. This in turn results in lower development costs for future projects, reliable software tested thoroughly across multiple efforts, and reduction of technical debt in our codebase. Using this architecture and design philosophy, we've implemented the various functionalities required for a lunar rover, from capturing images using onboard cameras, to traversing the lunar surface, to phoning home with telemetry and collected data - and much more.
 
@@ -40,7 +40,7 @@ _Yours truly working with the CM1 EM rover._
 Image Credit: Astrobotic
 {: refdef}
 
-CubeRover's next flight mission will be as a part of [**LunaGrid-Lite (LGL)**](TODO/LGLCDR), a demonstration mission which will serve as a precursor to the deployment of LunaGrid, Astrobotic's solar power grid for the surface of the Moon. LGL will deploy 500 m of cable across the surface of the Moon via a CubeRover. 1 kW of power will then be transmitted through the cable, and the performance of the power transmission system will be studied in the lunar environment.
+CubeRover's next flight mission will be as a part of [**LunaGrid-Lite (LGL)**](https://www.astrobotic.com/lunagrid-lite-completes-critical-design-review-flight-model-underway/), a demonstration mission which will serve as a precursor to the deployment of LunaGrid, Astrobotic's solar power grid for the surface of the Moon. LGL will deploy 500 m of cable across the surface of the Moon via a CubeRover. 1 kW of power will then be transmitted through the cable, and the performance of the power transmission system will be studied in the lunar environment.
 
 {:refdef: style="text-align: center;"}
 ![LunaGrid-Lite (LGL) EM Rover in the MoonYard](/assets/images/lunar-rovers/lgl-em.jpg){: width="50%"}
@@ -53,4 +53,4 @@ For the LGL mission, knowledge of the rover's location relative to the lander fr
 
 Thus on top of continuing CubeRover flight software development for LGL, I also developed a ground-based localization system for the rover which fuses data from onboard sensors (reported down via telemetry) into an estimate of the rover's trajectory. This system optimizes across the entire trajectory of the rover, ensuring even previous poses of the rover can be known with increasing accuracy as more data from the rover is collected. With simulations using expected sensor uncertainty parameters, this localization system has performed exceedingly well.
 
-The team at Astrobotic continues to work on improving the functionality and autonomous capabilities of CubeRover. I look forward to seeing CM1 fly!
+The team at Astrobotic continues to work on improving the functionality and autonomous capabilities of CubeRover. I look forward to seeing CM1/LGL fly!
