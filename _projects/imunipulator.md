@@ -19,14 +19,15 @@ Here's a demo of the full device:
 
 <br>
 
-{% details **<u>Table of Contents</u>** %}
+<details markdown="1">
+<summary><b><u>Table of Contents</u></b></summary>
 - [Design](#design)
 - [Drivers](#drivers)
 - [Mechanical Hardware](#mechanical-hardware)
   - [Base](#base)
   - [End-Effector Options](#end-effector-options)
 - [Team](#team)
-{% enddetails %}
+</details>
 
 
 ****
@@ -47,54 +48,60 @@ The roll axis controls the lower joint of the arm, called the "base" joint. The 
 
 Finally, the arm can be returned to its default "home" position via a touch of an external capacitive touch sensor.
 
-{% details **<u>Expand</u>** for more technical details on the control logic. %}
+<details markdown="1">
+<summary><b><u>Expand</u></b> for more technical details on the control logic.</summary>
 
 The servos are controlled via PWM duty cycles, each one indicating a different position to which the servo should move. The micro:bit sends data over I2C to set the value of that duty cycle to the PCA9685, which in turn produces a PWM signal with that duty cycle. Each servo has a mechanical limit of 180 degrees of rotation, though the arm joint is limited in software to less than that so it won't collide with the ground.
 
 While an IMU axis remains tilted beyond its threshold, the servo commanded position is incremented/decremented at a certain rate. This rate can be controlled by the "sensitivity" level of the arm, which is adjusted via the micro:bit's built-in capacitive touch sensor and indicated by the built-in LED matrix.
 
-{% enddetails %}
+</details>
 
 ****
 
 ## Drivers
 We had to write several drivers in order to interface with the various devices used.
 
-{% details **<u>I2C</u>** %}
+<details markdown="1">
+<summary><b><u>I2C</u></b></summary>
 
 A general use driver to communicate with a device on one of the micro:bit's I2C buses.
 
-{% enddetails %}
+</details>
 
-{% details **<u>IMU</u>** %}
+<details markdown="1">
+<summary><b><u>IMU</u></b></summary>
 
 A driver that uses the I2C driver to communicate with the [Adafruit TDK InvenSense ICM-20948 9-DoF IMU](https://learn.adafruit.com/adafruit-tdk-invensense-icm-20948-9-dof-imu)'s accelerometer and convert the received acceleration data into tilt angles.
 
-{% enddetails %}
+</details>
 
-{% details **<u>Servos</u>** %}
+<details markdown="1">
+<summary><b><u>Servos</u></b></summary>
 A driver that uses the I2C driver to communicate with the [Adafruit PCA9685 I2C 16-Channel 12-bit PWM Driver](https://www.adafruit.com/product/815). This external board takes commanded duty cycles over I2C and translates them to PWM signals, which are then sent out to the MG996R and DS3218 servos used in the robot joints. Each duty cycle corresponds to a certain rotational position for the servo, from 0 to 180 degrees. Interestingly, although this duty cycle to servo angle relationship was supposed to be linear, using a simple linear equation to calculate duty cycle from desired angle didn't actually work very well. Instead, we had to take several data points for different desired angles and commanded duty cycle relationships, store them in arrays, and linearly interpolate between them to get accurate servo positions.
 
-{% enddetails %}
+</details>
 
 {% include youtube.html video_id="rIAc1I_heek" width="50%" %}
 {:refdef: style="text-align: center;"}
 _Testing out the servo driver by moving the two servos in unison through their range of motion._
 {: refdef}
 
-{% details **<u>Capacitive Touch</u>** %}
+<details markdown="1">
+<summary><b><u>Capacitive Touch</u></b></summary>
 
 A driver that determines if the micro:bit's built-in "capacitive touch sensor" (really just a pin connected to the micro:bit logo) has been touched. External [SparkFun AT42QT1011 Capacitive Touch Breakouts](https://www.sparkfun.com/products/14520) were also used, but these just provided a digital signal to GPIO pins and did not require this special driver.
 
-{% enddetails %}
+</details>
 
 
 
-{% details **<u>LED Matrix</u>** %}
+<details markdown="1">
+<summary><b><u>LED Matrix</u></b></summary>
 
 A driver to control the micro:bit's built-in LED matrix, which was used to indicate the arm's current sensitivity level.
 
-{% enddetails %}
+</details>
 
 ****
 

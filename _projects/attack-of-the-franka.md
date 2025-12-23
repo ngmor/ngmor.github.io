@@ -19,13 +19,14 @@ The **Python**-based system uses an **Intel RealSense D435i** and **OpenCV** to 
 
 <br>
 
-{% details **<u>Table of Contents</u>** %}
+<details markdown="1">
+<summary><b><u>Table of Contents</u></b></summary>
 - [Computer Vision](#computer-vision)
 - [Motion](#motion)
 - [Conclusions](#conclusions)
 - [Future Work](#future-work)
 - [Team Organization](#team-organization)
-{% enddetails %}
+</details>
 
 ****
 
@@ -41,7 +42,8 @@ _A single ally and a single enemy, as seen from the RealSense's camera feed._
 
 Color image data and depth data are published from the RealSense camera. An **AprilTag** detection package detects three AprilTags from this camera data, which help determine the relative location of the robot to the camera and the bounds of the work area.
 
-{% details **<u>Expand</u>** for more technical details on the AprilTag system. %}
+<details markdown="1">
+<summary><b><u>Expand</u></b> for more technical details on the AprilTag system.</summary>
 
 First, the [ROS 2 wrapper for Intel RealSense devices](https://github.com/IntelRealSense/realsense-ros) is used to connect to the RealSense and publish color image data and depth data that is aligned with the color image camera reference frame.
 
@@ -51,7 +53,7 @@ This project employs three tags - one to determine the location of the robot's t
 
 Especially important was the robot table tag, the large tag shown in the left of the above feed. The size of this tag was increased to improve transformation accuracy. This tag was placed in a fixed location relative to the Panda's base reference frame. Therefore, knowing the pose of this tag in the camera's reference frame allowed us to know the position of the robot relative to the camera.
 
-{% enddetails %}
+</details>
 
 <br>
 
@@ -64,7 +66,8 @@ _The TF tree and camera feed with overlaid frames, as represented in RVIZ._
 
 The `camera_processor` node then detects the blocks in the work area by their color, using the HSV color space, contouring, and a few filters to improve detection. The 2D pixel location of the blocks in the image is combined with depth data to determine the 3D relative position of the blocks with respect to the Panda arm.
 
-{% details **<u>Expand</u>** for more technical details on the block detection system. %}
+<details markdown="1">
+<summary><b><u>Expand</u></b> for more technical details on the block detection system.</summary>
 
 The `camera_processor` node subscribes to the color and aligned depth image data and processes it using OpenCV. The color data is converted into the HSV color space, which helps reduce problems in color detection caused by lighting changes. A certain range of HSV values representing red colors is defined as "enemy" and likewise another blue range defines "allies."
 
@@ -74,7 +77,7 @@ Finally, a few filters are applied to ensure we only consider detected objects w
 
 The 3D real world coordinates of the detected objects are broadcast as transformations, which gives the motion subsystem the information needed to plan out the Panda's attacks.
 
-{% enddetails %}
+</details>
 
 <br>
 
@@ -93,7 +96,8 @@ As of the completion of this project, no [Python bindings](https://github.com/ro
 
 The API was implemented as a Python class, which is used inside of the Python `robot_control` node that handles all motion.
 
-{% details **<u>Expand</u>** for more technical details on the API. %}
+<details markdown="1">
+<summary><b><u>Expand</u></b> for more technical details on the API.</summary>
 
 Our API handled:
 - Reading and publishing to the `planning scene` to ensure the robot and the lightsaber it wielded did not collide with objects in the environment
@@ -101,7 +105,7 @@ Our API handled:
 - Interfacing with the `move_action` action to plan a collision-free trajectory to the desired joint positions
 - Interfacing with the `execute_trajectory` action to execute previously planned trajectories
 
-{% enddetails %}
+</details>
 
 <br>
 
@@ -116,11 +120,12 @@ By adding **collision objects** - like the walls, tables, and ceiling - to the p
 
 The robot's first task is to draw its lightsaber from a fixed sheath attached to its table. In order to do this, we plan a trajectory to the fixed starting position of the lightsaber, grasp it, and return to ready position, avoiding collisions along the way.
 
-{% details **<u>Expand</u>** for more technical details on the collision avoidance. %}
+<details markdown="1">
+<summary><b><u>Expand</u></b> for more technical details on the collision avoidance.</summary>
 
 The lightsaber is added to the planning scene as a special **attached collision object** - meaning it moves with the robot and is allowed to collide with certain robot links (like the end-effector in which it is grasped). When grasping the lightsaber, it starts as a collision object so the arm will avoid it. Once grasped, the lightsaber changes to an attached collision object so collision-free trajectory plans account for it.
 
-{% enddetails %}
+</details>
 
 <br>
 
@@ -145,7 +150,8 @@ After executing each attack, the camera is checked to see if the attack has been
 _A stab attack._
 {: refdef}
 
-{% details **<u>Expand</u>** for more technical details on the attack planning. %}
+<details markdown="1">
+<summary><b><u>Expand</u></b> for more technical details on the attack planning.</summary>
 
 The process for selecting an attack style has two checks. First, there is a simple geometric check - using the position of the objects from CV - to determine if a selected attack style will cause an enemy to fall into an ally. Secondly, the node attempts to plan motion to attack in that selected attack style. For this check, the allies are added as collision objects in the planning scene. If a collision were to occur during the motion, this plan fails.
 
@@ -153,7 +159,7 @@ If either of these checks fail for a particular attack style, the same checks ar
 
 These attacks use several joint state waypoints, adjusted for the position of the enemy, in order to ensure the motion planning reliably completes.
 
-{% enddetails %}
+</details>
 
 ****
 
@@ -168,17 +174,19 @@ Overall I'm looking forward to more chances to design multi-faceted robotic syst
 
 ## Future Work
 
-{% details **1. Improving motion planning robustness.** %}
+<details markdown="1">
+<summary><b>1. Improving motion planning robustness.</b></summary>
 
 The most impactful future improvement to this project would be to increase the robustness of the motion planning algorithms. With arbitrary enemy and ally positions, there are many scenarios and edge cases, not all of which the team was able to test. Planning for more of these edge cases and better defining specific motions to handle them would improve the performance of the system. Adding even more possible attack styles could also reduce the number of enemies that are unreachable due to configuration of allies in the work area.
 
-{% enddetails %}
+</details>
 
-{% details **2. Adding more object detection methods.** %}
+<details markdown="1">
+<summary><b>2. Adding more object detection methods.</b></summary>
 
 This project was based on color detection as a central method of detecting and differentiating object types. It would be an exciting challenge to expand this object detection capability. For example, one could use [YOLO](https://pjreddie.com/darknet/yolo/) or other neural networks to analyze the image and detect multiple different types of objects that represent allies and enemies based on a training dataset.
 
-{% enddetails %}
+</details>
 
 ****
 

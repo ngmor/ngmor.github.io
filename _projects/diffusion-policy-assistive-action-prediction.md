@@ -17,7 +17,8 @@ A portion of the project involved [upgrading the omnids' onboard systems](/proje
 
 <br>
 
-{% details **<u>Table of Contents</u>** %}
+<details markdown="1">
+<summary><b><u>Table of Contents</u></b></summary>
 - [Assistive Action Prediction with the Omnids](#assistive-action-prediction-with-the-omnids)
   - [Force Prediction](#force-prediction)
   - [Position Prediction](#position-prediction)
@@ -31,7 +32,7 @@ A portion of the project involved [upgrading the omnids' onboard systems](/proje
     - [Architecture Selection](#architecture-selection)
     - [Model Performance](#model-performance)
 - [Future Work](#future-work)
-{% enddetails %}
+</details>
 
 ****
 
@@ -85,7 +86,8 @@ Finally, base twist prediction could either replace the float controller entirel
 
 [**Diffusion policy**](https://diffusion-policy.cs.columbia.edu/) was introduced in 2023. This policy applies diffusion models (a type of generative machine learning model) to the generation of robotic action sequences based on a dataset of human demonstrations. The action generation is conditioned on observations from the robot's sensors, allowing the robot to consider its state and the state of the world around it while planning actions.
 
-{% details **<u>Expand</u>** for more details on diffusion models and how diffusion policy works.%}
+<details markdown="1">
+<summary><b><u>Expand</u></b> for more details on diffusion models and how diffusion policy works.</summary>
 
 ### What is a diffusion model?
 [Diffusion models](https://en.wikipedia.org/wiki/Diffusion_model) were introduced in 2015 as a method of learning a model that can sample from highly complex probability distributions. The models used in this project are based on the [denoising diffusion probabilistic model (DDPM)](https://en.wikipedia.org/wiki/Diffusion_model#Denoising_diffusion_model), introduced in 2020.
@@ -99,7 +101,8 @@ A classic use of this type of model is image generation, where by training the m
 _This example is from a [simple model](https://www.youtube.com/watch?v=a4Yfz2FxXiY) I trained on the [Caltech 101](https://data.caltech.edu/records/mzrjq-6wc02) Motorbikes dataset._
 {: refdef}
 
-{% details **<u>Expand</u>** for more details on image generation with diffusion models. %}
+<details markdown="1">
+<summary><b><u>Expand</u></b> for more details on image generation with diffusion models.</summary>
 
 To do this, the process takes images from the input dataset and gradually introduces more and more Gaussian noise into them over _k_ timesteps. Once enough of this noise is added, all of the original image data is lost, and all that remains is Gaussian noise. A neural network can subsequently be trained to take the diffusion timestep _k_ and the noisy image at that timestep and "predict the noise" that was added to that image from the previous timestep.
 
@@ -107,7 +110,7 @@ Once the network has been trained, the process can then be reversed. An image co
 
 Importantly, the model can also be conditioned on other inputs, such as a text prompt. At a high level, this is how many popular image generation models (such as Stable Diffusion and DALL-E 3) generate images from a text prompt.
 
-{% enddetails %}
+</details>
 
 <br>
 
@@ -144,7 +147,7 @@ After predicting an action sequence across a **prediction horizon (_Tp_)** based
 
 The advantage of using a diffusion model to plan robot actions like this is that, as mentioned above, diffusion models can sample from complex arbitrary distributions. Robot action sequence distributions are often complex and multimodal - there are often many ways a robot can accomplish a certain task, and diffusion policy handles those complexities gracefully.
 
-{% enddetails %}
+</details>
 
 ****
 
@@ -192,7 +195,8 @@ In order to record all this data, [Hang-Yin](https://hang-yin.github.io/portfoli
 
 This infrastructure was critical in collecting data quickly and allowed a **full training human demonstration run to be recorded every 40 seconds**.
 
-{% details **<u>Expand</u>** for a full list of data collected from runs.%}
+<details markdown="1">
+<summary><b><u>Expand</u></b> for a full list of data collected from runs.</summary>
 This includes data that may only be meaningful on evaluation runs (with a generative model running).
 - Overhead camera images/info
 - Horizontal camera images/info
@@ -207,7 +211,7 @@ This includes data that may only be meaningful on evaluation runs (with a genera
 - Estimated odometry
 - Target positional achievement status
 - Details of generative model used (if any)
-{% enddetails %}
+</details>
 
 <br>
 
@@ -225,9 +229,10 @@ Training plots typically looked something like this, with validation loss quickl
 ![Training Plots](/assets/images/diffusion-policy-assistive-action-prediction/training-plots.png){: width="100%"}
 {: refdef}
 
-{% details **<u>Expand</u>** for more detail on the code required to get this model training. %}
+<details markdown="1">
+<summary><b><u>Expand</u></b> for more detail on the code required to get this model training.</summary>
 Luckily, the diffusion policy repository is generally well set up for quickly adding new tasks - but the cost of this flexibility is that the [codebase structure](https://github.com/ngmor/diffusion_policy#%EF%B8%8F-codebase-tutorial) takes some time to understand. In the end, since I was only creating new tasks, I could get it to work by simply adding new PyTorch dataset loaders, environment runners, and [hydra](https://hydra.cc/) task configurations. Finally, training data had to be converted from from ROS bag data to the [`zarr`](https://zarr.readthedocs.io/en/stable/index.html) format expected as input to the training pipeline. Decimation occurred during this conversion.
-{% enddetails %}
+</details>
 
 <br>
 
@@ -291,15 +296,17 @@ While preliminary results from this testing show some promise, much work still n
 
 
 
-{% details **1. Improved evaluation.** %}
+<details markdown="1">
+<summary><b>1. Improved evaluation.</b></summary>
 Task completion time and force experienced at the end effector may not be the best quantitative metrics by which to judge the effectiveness of assistive action prediction. They do not necessarily measure how easy it is for a human collaborator to work with the omnids. Developing better metrics may help make the effect of any particular model more clear.
 
 Also, the gauntlet task also may not be effective as an evaluation of the assistive action prediction. Designing other tasks for evaluation (such as payload manipulation) may give better insight into model effectiveness.
-{% enddetails %}
+</details>
 
 
 
-{% details **2. Exploring other model architectures.** %}
+<details markdown="1">
+<summary><b>2. Exploring other model architectures.</b></summary>
 As mentioned, I trained all models with the U-Net diffusion policy architecture. As per the [diffusion policy paper](https://arxiv.org/abs/2303.04137):
 <blockquote>
 In general, we recommend starting with the CNN-based diffusion policy implementation as the
@@ -307,17 +314,23 @@ first attempt at a new task. If performance is low due to task complexity or hig
 </blockquote>
 
 This task, especially when performed with lowdim models, is certainly high-rate. So attempting to tune the transformer formulation could be an alternative to improve performance.
-{% enddetails %}
+</details>
 
-{% details **3. Exploring other system architectures.** %}
+
+
+<details markdown="1">
+<summary><b>3. Exploring other system architectures.</b></summary>
 The Northwestern omnid team opted to not try the base twist prediction architecture at the time of this project, as it may cause erratic behavior on the part of the omnids. This might be an interesting architecture to try. The prediction could be used directly, or as a residual (which would require some code modification for training), or some other blending method could be used to blend the float controller's output with the model's prediction output.
 
 Some blending or smoothing method could also be used with the position prediction method to make it a feasible method as well.
 
 While the force prediction method is currently the most successful, it's also possible that it could be improved by using some smoothing or blending method to combine the model's output with feedback.
-{% enddetails %}
+</details>
 
-{% details **4. Model tuning.** %}
+
+
+<details markdown="1">
+<summary><b>4. Model tuning.</b></summary>
 While I did try several different inputs and outputs, model parameters are also important to the performance of a model regardless of architecture. Some candidates for experimentation are:
 - Length of observation horizon
 - Length of prediction horizon
@@ -325,15 +338,21 @@ While I did try several different inputs and outputs, model parameters are also 
 - DDIM vs DDPM noise scheduling and noise scheduling parameters
 - Data decimation rate
 - Length of training (epochs)
-{% enddetails %}
+</details>
 
-{% details **5. Collecting more data.** %}
+
+
+<details markdown="1">
+<summary><b>5. Collecting more data.</b></summary>
 As is typical in machine learning, the more (good) data, the better. Exploring the influence of more data on the effectiveness of the models may help determine how much data is "enough".
-{% enddetails %}
+</details>
 
-{% details **6. Testing with the full three robot system.** %}
+
+
+<details markdown="1">
+<summary><b>6. Testing with the full three robot system.</b></summary>
 Once reasonable results are obtained, it would be very interesting to test the full three robot payload manipulation with predictive models running for each robot. This would show if the assistive action prediction approach is effective beyond just the simple single robot case.
-{% enddetails %}
+</details>
 
 ****
 

@@ -17,13 +17,14 @@ I was interested in this autonomous inspection application, so my winter project
 
 <br>
 
-{% details **<u>Table of Contents</u>** %}
+<details markdown="1">
+<summary><b><u>Table of Contents</u></b></summary>
 - [The Application](#the-application)
 - [The System](#the-system)
   - [Navigation](#navigation)
   - [Optical Character Recognition](#optical-character-recognition)
 - [Future Work](#future-work)
-{% enddetails %}
+</details>
 
 ****
 
@@ -78,13 +79,14 @@ Here's a video of the Nav2 stack working with the Unitree Go1 for autonomous nav
 
 <br>
 
-{% details **<u>Expand</u>** for more technical details on the navigation subsystem. %}
+<details markdown="1">
+<summary><b><u>Expand</u></b> for more technical details on the navigation subsystem.</summary>
 
 The first part of integrating Nav2 with the Unitree Go1 was sensing. The Unitree Go1 EDU Plus model has an option of coming with a [**RoboSense RS-Helios-16P 3D LiDAR**](https://www.robosense.ai/en/rslidar/RS-Helios), so I worked with [Marno Nel](https://marnonel6.github.io/) to set up this sensor for mapping of the environment. We chose to process the point cloud data provided by this sensor with [**RTAB-Map**](http://introlab.github.io/rtabmap/) for its 3D 6DoF mapping capabilities. RTAB-Map provides the Nav2 stack with [**ICP odometry**](https://en.wikipedia.org/wiki/Iterative_closest_point) and SLAM updates for the position of the robot and objects in the environment. Nav2 then uses this information to create local and global costmaps for planning paths that avoid collisions with obstacles in the environment.
 
 The second part of integrating Nav2 with the Unitree Go1 was control. Nav2 can already plan paths and command velocities, but it needs some way to pass these commands through to the robot. I wrote a `cmd_processor` ROS 2 C++ node in the [`unitree_nav`](https://github.com/ngmor/unitree_nav) repository that takes in commanded velocities and translates them to control messages that can be interpreted by my communication node in the [`unitree_ros2`](https://github.com/katie-hughes/unitree_ros2) repository and sent to the Go1 over UDP. This node also handles other control capabilities, like commanding the Go1 to stand up and lay down. The other half of control was commanding Nav2 to plan and execute paths, which I wrote example code for in the `nav_to_pose` node of the `unitree_nav` repository.
 
-{% enddetails %}
+</details>
 
 ****
 
@@ -105,7 +107,8 @@ _Go1 head front camera feeds of stereo rectified and depth images and point clou
 _Making the dog read dog words._
 {: refdef}
 
-{% details **<u>Expand</u>** for more technical details on the visual text detection subsystem. %}
+<details markdown="1">
+<summary><b><u>Expand</u></b> for more technical details on the visual text detection subsystem.</summary>
 
 My Unitree Camera SDK C++ wrapper uses [`image_transport`](https://github.com/ros-perception/image_common/tree/ros2/image_transport) for image compression. This publishes raw, rectified, depth, and point cloud images from any of the Go1's five onboard cameras.
 
@@ -113,7 +116,7 @@ The first machine learning model uses a neural network based on a [TensorFlow re
 
 The second machine learning model uses a **convolutional recurrent neural network (CRNN)** trained on the [MJSynth](https://www.robots.ox.ac.uk/~vgg/data/text/) and [SynthText](https://www.robots.ox.ac.uk/~vgg/data/scenetext/) datasets. It accepts the bounding vertices from the EAST model and parses the image cropped at those vertices into actual text, shown in red above.
 
-{% enddetails %}
+</details>
 
 <br>
 
@@ -128,7 +131,8 @@ Finally, I wrote a simple pitch sweeping sequence that commands the Go1 to sweep
 ## Future Work
 Putting the navigation and OCR subsystems together creates a system that can pretty reliably navigate between inspection points in an arbitrary order and avoid obstacles along the way. But as with any project, there is always improvements that can be made.
 
-{% details **1. Letting the dog off the leash.** %}
+<details markdown="1">
+<summary><b>1. Letting the dog off the leash.</b></summary>
 
 As can be seen in the demo video, an Ethernet cable connects my laptop to the Go1's network of internal computers. This is partially so I can run visualization of the map and point cloud data in RVIZ, but it's also because our Go1's onboard computers are not yet capable of running all the required nodes for this project.
 
@@ -136,31 +140,35 @@ One of the most challenging parts of this project was upgrading the Go1's onboar
 
 Unfortunately, we did not have time to also upgrade the Jetson Xavier NX on the Go1, which has more computing power. Getting the Xavier on 22.04 would allow us to run point cloud processing nodes at reasonable speeds on the robot. We also currently have some limited wireless control of the Go1, which could be improved by bridging the onboard network through the Go1 Raspberry Pi's WiFi adapter. These two improvements would allow us to let the dog off the leash and create a truly mobile autonomous inspection bot.
 
-{% enddetails %}
+</details>
 
-{% details **2. Integrating IMU odometry.** %}
+<details markdown="1">
+<summary><b>2. Integrating IMU odometry.</b></summary>
 
 The Go1 provides some odometry calculated from data from its onboard IMU, with limited accuracy. [Marno Nel](https://marnonel6.github.io/) and I experimented with integrating this with the Nav2 stack for faster odometry updates, but we weren't able to get it working in time to compare with the ICP odometry. Onboard IMU odometry may help improve localization by providing faster odometry updates in between the LiDAR-based SLAM updates. Our progress can be found in the [`onboard-odometry`](https://github.com/ngmor/unitree_nav/tree/onboard-odometry) branch of the `unitree_nav` repo.
 
-{% enddetails %}
+</details>
 
-{% details **3. Improving holonomic capabilities.** %}
+<details markdown="1">
+<summary><b>3. Improving holonomic capabilities.</b></summary>
 
 The Go1 can move forward, backward, and to each side. At current, Nav2 only ever plans paths where the robot moves in the forward and backward directions and rotates. With a little more investigation, this could be improved so the robot can move side to side too when planning paths!
 
-{% enddetails %}
+</details>
 
-{% details **4. Improving data search capabilities.** %}
+<details markdown="1">
+<summary><b>4. Improving data search capabilities.</b></summary>
 
 Currently, when searching for data, the Go1 only sweeps up and down from its current position. If there was some error in the navigation, this can sometimes cause it to miss the data at the inspection point. Improved algorithms to move the Go1 around the inspection point might help find the data more reliably.
 
-{% enddetails %}
+</details>
 
-{% details **5. Adding other sensors.** %}
+<details markdown="1">
+<summary><b>5. Adding other sensors.</b></summary>
 
 Visual inspection is great and could be extended to further cases. But it would also be versatile to include other sensors such as IR cameras to improve the dog's sensing capabilities.
 
-{% enddetails %}
+</details>
 
 ****
 

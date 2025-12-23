@@ -19,14 +19,15 @@ Here's a video of my solution to the problem:
 
 <br>
 
-{% details **<u>Table of Contents</u>** %}
+<details markdown="1">
+<summary><b><u>Table of Contents</u></b></summary>
 - [Design](#design)
   - [Milestone 1: youBot Kinematics Simulator](#milestone-1-youbot-kinematics-simulator)
   - [Milestone 2: Reference Trajectory Generation](#milestone-2-reference-trajectory-generation)
   - [Milestone 3: Feedforward/Feedback Control](#milestone-3-feedforwardfeedback-control)
   - [Self-Collision Avoidance](#self-collision-avoidance)
 - [Future Work](#future-work)
-{% enddetails %}
+</details>
 
 ****
 

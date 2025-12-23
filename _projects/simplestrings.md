@@ -16,7 +16,8 @@ SimpleStrings was designed as a tool for music therapy. [**Music Therapy**](http
 
 <br>
 
-{% details **<u>Table of Contents</u>** %}
+<details markdown="1">
+<summary><b><u>Table of Contents</u></b></summary>
 - [Problem Definition](#problem-definition)
 - [Design](#design)
     - [Characteristics/Functionality](#characteristicsfunctionality)
@@ -24,7 +25,7 @@ SimpleStrings was designed as a tool for music therapy. [**Music Therapy**](http
 - [Future Work](#future-work)
 - [Conclusions](#conclusions)
 - [Team Organization](#team-organization)
-{% enddetails %}
+</details>
 
 ****
 
@@ -83,11 +84,12 @@ Although I was involved in almost all aspects of this project, my primary respon
 
 One of the main challenges was the amount of IO that we needed to control. 5 OLED screens controlled via I2C, 7 digital buttons, and a grid of 24 motors is a lot of IO points to consider. Our solution was to use the Arduino Mega 2560 Pro - a smaller form factor version of the Arduino MEGA 2560 - for its extra IO capacity and shift registers to send commands to motor control boards.
 
-{% details **<u>Expand</u>** for more technical details on the IO handling. %}
+<details markdown="1">
+<summary><b><u>Expand</u></b> for more technical details on the IO handling.</summary>
 
 Even with the higher capacity Mega 2560 Pro board there was not enough IO to independently control each of the 24 motors with a PWM signal. Part of the solution for this was to use separate motor control boards, which allowed us to use simple digital signals to send commands to the motors. Still, multiple digital signals to each of the 24 motors meant quite a bit of digital output pins to use. Instead, our solution was to use an array of shift registers to which we fed motor commands serially. Since we always needed to send commands to all motors at the same time (during a chord change), we could simply load our commands into the shift registers and then trigger movements simultaneously.
 
-{% enddetails %}
+</details>
 
 {:refdef: style="text-align: center;"}
 ![Arduino MEGA 2560 Pro](/assets/images/simplestrings/arduino-mega-2560-pro.png){: width="30%" }
@@ -95,11 +97,12 @@ Even with the higher capacity Mega 2560 Pro board there was not enough IO to ind
 
 We also used 5 small OLED displays, roughly lined up with the buttons below to encourage a spatial relationship between the buttons and the data on the screens.
 
-{% details **<u>Expand</u>** for more technical details on the OLED displays. %}
+<details markdown="1">
+<summary><b><u>Expand</u></b> for more technical details on the OLED displays.</summary>
 
 These particular OLED displays communicated over I2C, but only had 2 options for I2C addresses. In order to control each display individually, we had to make use of an I2C multiplexer. This allowed us to toggle between the screens to send updated data as necessary.
 
-{% enddetails %}
+</details>
 
 <br>
 
@@ -131,7 +134,8 @@ Prior to the design of the PCB, we had completed successful breadboard tests for
 ## Future Work
 Our design was only ever intended to be a first prototype of the SimpleStrings system, and there certainly were areas for improvement we would like to tackle if we pursued a next iteration. Some of our own desired improvements, as well as those we collected from the music therapists we talked to, are listed below.
 
-{% details **1. The height of the device is very cumbersome.** %}
+<details markdown="1">
+<summary><b>1. The height of the device is very cumbersome.</b></summary>
 
 This is perhaps the most significant improvement we could make for the product. It's large, which makes it more difficult to transport, attach, see the buttons, etc.
 
@@ -150,19 +154,21 @@ We could also explore other options for more efficient packaging of the componen
 ![Possible total height reduction](/assets/images/simplestrings/total-height-reduction.png){: width="40%"}
 {: refdef}
 
-{% enddetails %}
+</details>
 
-{% details **2. The screens currently don't indicate which chord is being played, which would be helpful for users.** %}
+<details markdown="1">
+<summary><b>2. The screens currently don't indicate which chord is being played, which would be helpful for users.</b></summary>
 
 This functionality would be possible with the current hardware and a software update, but we could even explore different options for color OLED screens and improve the UI of the device in general.
 
-{% enddetails %}
+</details>
 
-{% details **3. The buttons are difficult for users to see while playing the device.** %}
+<details markdown="1">
+<summary><b>3. The buttons are difficult for users to see while playing the device.</b></summary>
 
 Certainly reduction in height, as mentioned above, would help address this problem. We could also explore more ergonomic redesigns of the device form factor or improve the screen UI to reduce the relevance of looking directly at the buttons.
 
-{% enddetails %}
+</details>
 
 ****
 

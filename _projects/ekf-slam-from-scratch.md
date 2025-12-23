@@ -25,7 +25,8 @@ The video above shows this project in action. The RVIZ window on the right shows
 
 As can be seen, the EKF SLAM estimate follows the real-world position of the robot closely, even as the odometry estimate drifts.
 
-{% details **<u>Table of Contents</u>** %}
+<details markdown="1">
+<summary><b><u>Table of Contents</u></b></summary>
 - [SLAM Pipeline](#slam-pipeline)
   - [Odometry](#odometry)
   - [Landmark Detection and Data Association](#landmark-detection-and-data-association)
@@ -37,7 +38,7 @@ As can be seen, the EKF SLAM estimate follows the real-world position of the rob
     - [Correction](#correction)
 - [Simulation](#simulation)
 
-{% enddetails %}
+</details>
 
 ****
 
